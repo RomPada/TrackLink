@@ -5,6 +5,45 @@ This file is maintained for every release in English and Ukrainian.
 
 ---
 
+## v0.2.0 — Period analytics, click details and short URLs
+
+### English
+
+- Added the `System / Database` status section.
+- Rebuilt top-level analytics into four periods: today, last 7 days, current month, and all time.
+- Added `Unique` and `Total clicks` metrics to every period card.
+- Made period cards clickable; selecting one opens matching click records.
+- Added the same four-period analytics to every individual tracking link.
+- Replaced generated `/go/[slug]` URLs with short root URLs such as `/tg`.
+- Kept `/go/[slug]` working for backward compatibility with already published links.
+- Moved aggregate calculations into Supabase/PostgreSQL views.
+- Added country code to click records using Vercel geolocation headers.
+- Removed `referrer` from stored click records and the database schema.
+- Added click detail rows with anonymous visitor ID, time, country, source link, destination, and device type.
+- Added reserved root slugs to avoid collisions with TrackLink system routes.
+- Updated the application version to `v0.2.0`.
+
+### Українська
+
+- Додано блок стану `System / Database`.
+- Верхню статистику перероблено на чотири періоди: сьогодні, останні 7 днів, поточний місяць і весь час.
+- У кожному блоці додано показники `Унікальні` та `Всього переходів`.
+- Блоки періодів зроблено клікабельними; після натискання відкриваються відповідні записи переходів.
+- Таку саму статистику за чотири періоди додано для кожного окремого посилання.
+- Згенеровані URL змінено з `/go/[slug]` на короткі кореневі URL на кшталт `/tg`.
+- Старі `/go/[slug]` залишено робочими для сумісності з уже опублікованими посиланнями.
+- Агреговані розрахунки перенесено у Supabase/PostgreSQL views.
+- До запису переходу додано код країни через геолокаційні headers Vercel.
+- Поле `referrer` видалено із записів переходів і схеми бази даних.
+- У деталях переходів показуються анонімний ID відвідувача, час, країна, посилання-джерело, кінцева адреса та тип пристрою.
+- Додано зарезервовані slug для захисту системних маршрутів TrackLink.
+- Версію застосунку оновлено до `v0.2.0`.
+
+**Commit:** `feat: add period analytics and short tracking URLs`  
+**Release tag:** `v0.2.0`
+
+---
+
 ## v0.1.4 — Documentation structure update
 
 ### English
@@ -25,7 +64,8 @@ This file is maintained for every release in English and Ukrainian.
 - Додано прямі посилання між основним README, українським README та патчлістом.
 - Версію застосунку оновлено до `v0.1.4`.
 
-**Commit:** `v0.1.4 simplify documentation structure`
+**Commit:** `docs: simplify documentation structure`  
+**Release tag:** `v0.1.4`
 
 ---
 
@@ -49,7 +89,8 @@ This file is maintained for every release in English and Ukrainian.
 - Додано інструкцію щодо hydration mismatch, який можуть спричиняти розширення браузера.
 - Версію застосунку оновлено до `v0.1.3`.
 
-**Commit:** `v0.1.3 fix admin errors and add password toggle`
+**Commit:** `fix: improve admin diagnostics and password visibility`  
+**Release tag:** `v0.1.3`
 
 ---
 
@@ -71,7 +112,8 @@ This file is maintained for every release in English and Ukrainian.
 - Оновлено внутрішні ідентифікатори admin cookie/session.
 - Англійську та українську документацію оновлено під нову назву.
 
-**Commit:** `v0.1.2 rename project to TrackLink`
+**Commit:** `chore: rename project to TrackLink`  
+**Release tag:** `v0.1.2`
 
 ---
 
@@ -97,7 +139,8 @@ This file is maintained for every release in English and Ukrainian.
 - Додано README англійською та українською.
 - Додано патчлісти англійською та українською.
 
-**Commit:** `v0.1.1 improve admin UI and docs`
+**Commit:** `style: improve admin UI contrast`  
+**Release tag:** `v0.1.1`
 
 ---
 
@@ -123,4 +166,5 @@ This file is maintained for every release in English and Ukrainian.
 - Додано фільтрацію preview-ботів.
 - Додано схему Supabase та структуру проєкту для деплою.
 
-**Commit:** `v0.1.0 initial MVP release`
+**Commit:** `feat: create initial link tracking MVP`  
+**Release tag:** `v0.1.0`

@@ -306,7 +306,7 @@ h3 { margin-bottom: 4px; font-size: 20px; }
 }
 
 .password-toggle:hover {
-  background: var(--surface-muted);
+  background: var(--panel-muted);
   color: var(--text);
 }
 
@@ -356,4 +356,263 @@ h3 { margin-bottom: 4px; font-size: 20px; }
   padding: 2px 6px;
   border-radius: 6px;
   background: rgba(127, 29, 45, 0.08);
+}
+
+/* v0.2.0 analytics and system/database UI */
+.stats-section {
+  margin-bottom: 18px;
+}
+
+.period-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.period-card {
+  display: block;
+  min-width: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  padding: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.period-card:hover {
+  transform: translateY(-2px);
+  border-color: #8195af;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, .11);
+}
+
+.period-card-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(11, 23, 48, .08), var(--shadow);
+}
+
+.period-card-title {
+  min-height: 38px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.period-card-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.period-card-metrics > div {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px;
+  background: #fff;
+}
+
+.period-card-metrics span {
+  display: block;
+  min-height: 34px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.period-card-metrics strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.period-stats-grid-compact {
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.period-stats-grid-compact .period-card {
+  padding: 13px;
+  border-radius: 14px;
+  box-shadow: none;
+  background: var(--panel-muted);
+}
+
+.period-stats-grid-compact .period-card-title {
+  min-height: 34px;
+  font-size: 12px;
+}
+
+.period-stats-grid-compact .period-card-metrics {
+  gap: 7px;
+}
+
+.period-stats-grid-compact .period-card-metrics > div {
+  padding: 9px;
+}
+
+.period-stats-grid-compact .period-card-metrics strong {
+  font-size: 20px;
+}
+
+.link-last-click {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.system-panel {
+  background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+}
+
+.system-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.system-card {
+  border: 1px solid var(--line-strong);
+  border-radius: 15px;
+  padding: 16px;
+  background: #fff;
+}
+
+.system-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.system-card dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.system-card dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.system-card dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.system-card dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.records-panel {
+  scroll-margin-top: 18px;
+}
+
+.records-heading {
+  align-items: flex-start;
+}
+
+.records-summary {
+  margin: -4px 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.records-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+}
+
+.records-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+  background: white;
+}
+
+.records-table th,
+.records-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.records-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--panel-muted);
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.records-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.records-table tbody tr:hover td {
+  background: #f8fbff;
+}
+
+.records-table code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.record-secondary {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.record-destination {
+  max-width: 320px;
+  word-break: break-word;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+@media (max-width: 980px) {
+  .period-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .period-stats-grid-compact {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .system-grid,
+  .period-stats-grid,
+  .period-stats-grid-compact {
+    grid-template-columns: 1fr;
+  }
+
+  .period-card-title {
+    min-height: auto;
+  }
+
+  .records-heading {
+    flex-direction: column;
+  }
 }

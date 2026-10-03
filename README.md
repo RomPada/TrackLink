@@ -1,34 +1,52 @@
 # TrackLink
 
-Version: **v0.1.4**
+Version: **v0.2.0**
 
-TrackLink is a small self-hosted click tracker for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.
+TrackLink is a small self-hosted redirect and click analytics app for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.
 
 Ukrainian documentation: [README.ua.md](./README.ua.md)  
 Release history: [PATCHLIST.md](./PATCHLIST.md)
 
-Example links:
+Short tracking URLs look like this:
 
-- `https://your-domain.com/go/tg`
-- `https://your-domain.com/go/instagram`
-- `https://your-domain.com/go/fb`
+- `https://your-domain.com/tg`
+- `https://your-domain.com/instagram`
+- `https://your-domain.com/fb`
 
 All links can redirect to the same destination while keeping separate statistics for each slug.
 
 ## Features
 
 - unlimited tracking links;
-- redirect route `/go/[slug]`;
-- total click count;
-- approximate unique visitors via anonymous cookie ID;
-- 24-hour and 7-day stats;
-- 14-day activity chart;
-- edit name, slug, and destination URL;
-- enable or disable links;
-- delete links;
+- short redirect route `/[slug]` instead of `/go/[slug]`;
+- backward compatibility for old `/go/[slug]` links;
+- aggregated statistics for today, the last 7 days, the current month, and all time;
+- both total clicks and approximate unique visitors for every period;
+- the same four-period analytics for every individual tracking link;
+- clickable period cards that open recent click records;
+- click record details: anonymous visitor ID, date/time, country, source link, destination, and device type;
+- country detection from Vercel geolocation headers without storing the visitor IP address;
+- 14-day aggregate activity chart;
+- System / Database status block;
+- link creation, editing, enable/disable, and deletion;
 - password-protected admin area;
-- filtering of major social preview bots and browser prefetch requests;
-- no IP address storage.
+- filtering of common social preview bots and browser prefetch requests;
+- no IP address storage;
+- `referrer` is no longer stored.
+
+## Important upgrade step from v0.1.x
+
+Version `v0.2.0` changes the database schema.
+
+After updating the code, open **Supabase -> SQL Editor** and run the current file:
+
+```text
+supabase/schema.sql
+```
+
+The script is designed to upgrade an existing TrackLink database. It adds the country field, removes the old `referrer` field, and creates the new aggregate/detail views.
+
+Existing click records remain in the database. Old records will not have country information because it was not collected before v0.2.0.
 
 ## 1. Create a Supabase project
 
@@ -69,6 +87,12 @@ Admin area:
 
 `http://localhost:3000/admin`
 
+A test tracking URL can look like:
+
+`http://localhost:3000/tg`
+
+Country detection is normally unavailable on localhost, so local records can show the country as unknown/local.
+
 ## 3. GitHub
 
 Create a repository and upload the project code. Do not commit `.env.local`; it is excluded by `.gitignore`.
@@ -84,19 +108,43 @@ Create a repository and upload the project code. Do not commit `.env.local`; it 
    - `ADMIN_SECRET`
 4. Deploy.
 
-After deployment, you can create links such as:
+After deployment, links can look like:
 
-- `https://your-project.vercel.app/go/tg`
-- `https://your-project.vercel.app/go/instagram`
-- `https://your-project.vercel.app/go/facebook`
+- `https://your-project.vercel.app/tg`
+- `https://your-project.vercel.app/instagram`
+- `https://your-project.vercel.app/facebook`
 
-You can later connect a custom domain such as `go.brand.com`.
+You can later connect a custom domain such as `brand.link`, producing URLs like `https://brand.link/tg`.
+
+## Aggregated statistics
+
+TrackLink calculates statistics in PostgreSQL/Supabase views instead of loading all raw click records into the dashboard.
+
+The dashboard contains four periods:
+
+- Today — based on the `Europe/Kyiv` calendar date;
+- Last 7 days — today plus the previous six calendar days;
+- Month — the current calendar month;
+- All time.
+
+Each period shows:
+
+- unique visitors;
+- total clicks.
+
+Clicking a period opens its detailed records. To keep the admin page responsive, the detail view shows up to the latest 100 matching records while also displaying the full matching count.
 
 ## How unique visitors are counted
 
-On the first tracked visit, TrackLink stores an anonymous `tt_visitor` cookie containing a random UUID. Later visits from the same browser reuse that ID.
+On the first counted visit, TrackLink stores an anonymous `tt_visitor` cookie containing a random UUID. Later visits from the same browser reuse that ID.
 
 This is **not an absolute user identity**. Another browser, device, cleared cookies, or some in-app browsers can create a new ID. Treat `Unique Visitors` as an approximation.
+
+## Country detection and privacy
+
+On Vercel, TrackLink reads the platform-provided `x-vercel-ip-country` request header and stores only the two-letter country code in the click record.
+
+IP addresses are not stored by TrackLink. IP-based country detection is approximate. Existing records from versions before v0.2.0 do not contain a country value.
 
 ## Social preview bots
 
@@ -110,36 +158,32 @@ Telegram, Facebook, LinkedIn, and similar platforms can open URLs automatically 
 
 - `link_id`;
 - anonymous `visitor_id`;
-- referrer;
+- `country_code`;
 - user-agent;
 - timestamp.
 
-IP addresses are not stored.
+The old `referrer` field is removed in v0.2.0.
 
-## Possible next improvements
+## Reserved slugs
 
-The current architecture can later support:
+Because tracking links now live at the domain root, these system paths cannot be used as link slugs:
 
-- UTM parameters;
-- CSV/Excel export;
-- custom date ranges;
-- QR codes;
-- campaign groups;
-- multiple administrators;
-- Supabase Auth instead of one shared password;
-- webhook or Telegram notifications;
-- a custom short domain such as `go.brand.com/tg`.
-
+- `admin`
+- `login`
+- `go`
+- `api`
+- `_next`
 
 ## Troubleshooting
 
-### Admin page shows a Supabase error after login
+### Admin page shows a Supabase error after upgrading
 
-Check:
+Run the latest `supabase/schema.sql` again in Supabase SQL Editor. Version v0.2.0 requires new fields and database views.
+
+Also check:
 
 - `SUPABASE_URL` in `.env.local`;
-- `SUPABASE_SECRET_KEY` must be a server Secret key in the form `sb_secret_...`, not `sb_publishable_...`;
-- the current `supabase/schema.sql` has been executed in Supabase SQL Editor.
+- `SUPABASE_SECRET_KEY` must be a server Secret key in the form `sb_secret_...`, not `sb_publishable_...`.
 
 Restart `npm run dev` after changing `.env.local`.
 

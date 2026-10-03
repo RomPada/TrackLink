@@ -10,6 +10,18 @@ import {
 } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
+const RESERVED_SLUGS = new Set([
+  "admin",
+  "login",
+  "go",
+  "api",
+  "_next",
+]);
+
+function isReservedSlug(slug: string) {
+  return RESERVED_SLUGS.has(slug);
+}
+
 function normalizeSlug(value: string) {
   return value
     .trim()
@@ -66,6 +78,10 @@ export async function createLinkAction(formData: FormData) {
     redirect(withMessage("/admin", "error", "Заповни всі поля"));
   }
 
+  if (isReservedSlug(slug)) {
+    redirect(withMessage("/admin", "error", "Цей slug зарезервований системою. Обери інший."));
+  }
+
   if (!isHttpUrl(destinationUrl)) {
     redirect(
       withMessage("/admin", "error", "Кінцева адреса має починатися з http:// або https://")
@@ -98,6 +114,10 @@ export async function updateLinkAction(formData: FormData) {
 
   if (!id || !name || !slug || !destinationUrl || !isHttpUrl(destinationUrl)) {
     redirect(withMessage("/admin", "error", "Перевір дані посилання"));
+  }
+
+  if (isReservedSlug(slug)) {
+    redirect(withMessage("/admin", "error", "Цей slug зарезервований системою. Обери інший."));
   }
 
   const supabase = getSupabaseAdmin();

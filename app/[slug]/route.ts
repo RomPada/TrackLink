@@ -6,7 +6,6 @@ export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ slug: string }> };
 
-// Backward compatibility for links created before v0.2.0.
 export async function GET(request: NextRequest, { params }: Params) {
   const { slug } = await params;
   return handleTrackingGet(request, slug);
