@@ -1,6 +1,6 @@
 # TrackLink
 
-Version: **v0.1.2**
+Version: **v0.1.3**
 
 TrackLink is a small self-hosted click tracker for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.
 
@@ -126,3 +126,20 @@ The current architecture can later support:
 - Supabase Auth instead of one shared password;
 - webhook or Telegram notifications;
 - a custom short domain such as `go.brand.com/tg`.
+
+
+## Troubleshooting
+
+### Admin page shows a Supabase error after login
+
+Check:
+
+- `SUPABASE_URL` in `.env.local`;
+- `SUPABASE_SECRET_KEY` must be a server Secret key in the form `sb_secret_...`, not `sb_publishable_...`;
+- the current `supabase/schema.sql` has been executed in Supabase SQL Editor.
+
+Restart `npm run dev` after changing `.env.local`.
+
+### Hydration mismatch in development
+
+If the warning contains foreign attributes such as `bis_skin_checked`, `bis_register`, or `__processed_...`, a browser extension is modifying the HTML before React hydrates it. Test in an incognito window or temporarily disable the extension for `localhost`.

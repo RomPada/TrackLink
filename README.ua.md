@@ -1,6 +1,6 @@
 # TrackLink
 
-Версія: **v0.1.2**
+Версія: **v0.1.3**
 
 TrackLink — це невеликий self-hosted трекер переходів для Telegram, Facebook, Instagram, реклами, email-кампаній, Patreon-посилань та інших джерел трафіку.
 
@@ -126,3 +126,20 @@ IP-адреса не зберігається.
 - Supabase Auth замість одного спільного пароля;
 - webhook або Telegram-сповіщення;
 - власний короткий домен, наприклад `go.brand.com/tg`.
+
+
+## Усунення помилок
+
+### Після входу адмінка показує помилку Supabase
+
+Перевір:
+
+- `SUPABASE_URL` у `.env.local`;
+- `SUPABASE_SECRET_KEY` — це має бути серверний Secret key виду `sb_secret_...`, а не `sb_publishable_...`;
+- чи був виконаний актуальний файл `supabase/schema.sql` у Supabase SQL Editor.
+
+Після зміни `.env.local` перезапусти `npm run dev`.
+
+### Hydration mismatch у режимі розробки
+
+Якщо в повідомленні є сторонні атрибути на кшталт `bis_skin_checked`, `bis_register` або `__processed_...`, їх додає розширення браузера до HTML ще до запуску React. Перевір сторінку в режимі інкогніто або тимчасово вимкни розширення на `localhost`.

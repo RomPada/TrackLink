@@ -60,25 +60,45 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   const ok = typeof params.ok === "string" ? params.ok : "";
   const errorMessage = typeof params.error === "string" ? params.error : "";
 
-  const supabase = getSupabaseAdmin();
-  const [linksResult, overallResult, dailyResult] = await Promise.all([
-    supabase.from("link_stats").select("*").order("created_at", { ascending: false }),
-    supabase.from("overall_stats").select("*").single(),
-    supabase.from("daily_stats").select("*").order("day", { ascending: true }).limit(14),
-  ]);
-
-  if (linksResult.error) throw linksResult.error;
-  if (overallResult.error) throw overallResult.error;
-  if (dailyResult.error) throw dailyResult.error;
-
-  const links = (linksResult.data ?? []) as LinkStat[];
-  const overall = overallResult.data as {
-    total_clicks: number | string;
-    unique_visitors: number | string;
-    clicks_7d: number | string;
-    clicks_24h: number | string;
+  let links: LinkStat[] = [];
+  let overall = {
+    total_clicks: 0,
+    unique_visitors: 0,
+    clicks_7d: 0,
+    clicks_24h: 0,
   };
-  const daily = (dailyResult.data ?? []) as DailyStat[];
+  let daily: DailyStat[] = [];
+  let databaseError = "";
+
+  try {
+    const supabase = getSupabaseAdmin();
+    const [linksResult, overallResult, dailyResult] = await Promise.all([
+      supabase.from("link_stats").select("*").order("created_at", { ascending: false }),
+      supabase.from("overall_stats").select("*").maybeSingle(),
+      supabase.from("daily_stats").select("*").order("day", { ascending: true }).limit(14),
+    ]);
+
+    const firstError = linksResult.error ?? overallResult.error ?? dailyResult.error;
+
+    if (firstError) {
+      const details = [firstError.code, firstError.message, firstError.details, firstError.hint]
+        .filter(Boolean)
+        .join(" · ");
+      databaseError = details || "Supabase повернув невідому помилку.";
+    } else {
+      links = (linksResult.data ?? []) as LinkStat[];
+      overall = {
+        total_clicks: Number(overallResult.data?.total_clicks ?? 0),
+        unique_visitors: Number(overallResult.data?.unique_visitors ?? 0),
+        clicks_7d: Number(overallResult.data?.clicks_7d ?? 0),
+        clicks_24h: Number(overallResult.data?.clicks_24h ?? 0),
+      };
+      daily = (dailyResult.data ?? []) as DailyStat[];
+    }
+  } catch (error) {
+    databaseError = error instanceof Error ? error.message : "Не вдалося підключитися до Supabase.";
+  }
+
   const maxDaily = Math.max(1, ...daily.map((item) => Number(item.clicks)));
 
   return (
@@ -96,6 +116,18 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
 
       {ok ? <div className="alert alert-success">{ok}</div> : null}
       {errorMessage ? <div className="alert alert-error">{errorMessage}</div> : null}
+
+      {databaseError ? (
+        <section className="database-error">
+          <h2>Не вдалося завантажити дані Supabase</h2>
+          <p>{databaseError}</p>
+          <div className="database-error-help">
+            Перевір <code>SUPABASE_URL</code> і <code>SUPABASE_SECRET_KEY</code> у <code>.env.local</code>.
+            Secret key має бути серверним ключем виду <code>sb_secret_...</code>.
+            Якщо таблиці або views ще не створені — повторно виконай <code>supabase/schema.sql</code> у Supabase SQL Editor.
+          </div>
+        </section>
+      ) : null}
 
       <section className="stats-grid">
         <article className="stat-card">

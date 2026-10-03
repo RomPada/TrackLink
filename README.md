@@ -1,6 +1,6 @@
 # TrackLink
 
-Current version: **v0.1.2**
+Current version: **v0.1.3**
 
 A simple self-hosted link click tracker for Telegram, Instagram, Facebook, email, ads, Patreon, and other traffic sources.
 

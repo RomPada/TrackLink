@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { loginAction } from "@/app/actions";
+import PasswordField from "@/components/PasswordField";
 import { isAdmin } from "@/lib/auth";
 import { APP_NAME, APP_VERSION } from "@/lib/app-meta";
 
@@ -22,7 +23,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
         <form action={loginAction} className="stack">
           <label>
             Пароль
-            <input name="password" type="password" autoComplete="current-password" required />
+            <PasswordField />
           </label>
           <button className="button button-primary" type="submit">
             Увійти
