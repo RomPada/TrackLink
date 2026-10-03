@@ -2,7 +2,7 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
-const COOKIE_NAME = "transition_tracker_admin";
+const COOKIE_NAME = "tracklink_admin";
 
 function getSessionValue() {
   const secret = process.env.ADMIN_SECRET;
@@ -11,7 +11,7 @@ function getSessionValue() {
   }
 
   return createHmac("sha256", secret)
-    .update("transition-tracker-admin-session-v1")
+    .update("tracklink-admin-session-v1")
     .digest("hex");
 }
 

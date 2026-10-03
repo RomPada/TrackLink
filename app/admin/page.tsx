@@ -9,6 +9,7 @@ import {
   updateLinkAction,
 } from "@/app/actions";
 import { isAdmin } from "@/lib/auth";
+import { APP_NAME, APP_VERSION } from "@/lib/app-meta";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -84,8 +85,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
     <main className="page-shell">
       <header className="topbar">
         <div>
-          <div className="eyebrow">Transition Tracker</div>
+          <div className="eyebrow">{APP_NAME}</div>
           <h1>Переходи за посиланнями</h1>
+          <p className="muted version-note">{APP_VERSION}</p>
         </div>
         <form action={logoutAction}>
           <button className="button button-ghost" type="submit">Вийти</button>

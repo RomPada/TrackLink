@@ -1,6 +1,6 @@
 {
-  "name": "transition-tracker",
-  "version": "1.0.0",
+  "name": "tracklink",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "dev": "next dev",

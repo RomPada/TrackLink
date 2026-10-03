@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { loginAction } from "@/app/actions";
 import { isAdmin } from "@/lib/auth";
+import { APP_NAME, APP_VERSION } from "@/lib/app-meta";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -13,9 +14,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   return (
     <main className="auth-shell">
       <section className="auth-card">
-        <div className="eyebrow">Transition Tracker</div>
-        <h1>Вхід в адмінку</h1>
-        <p className="muted">Введи пароль, який ти задаси у змінній ADMIN_PASSWORD.</p>
+        <h1>{APP_NAME}</h1>
+        <p className="muted auth-version">{APP_VERSION}</p>
 
         {error ? <div className="alert alert-error">{error}</div> : null}
 

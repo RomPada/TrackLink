@@ -1,4 +1,4 @@
--- Transition Tracker database schema for Supabase/Postgres
+-- TrackLink database schema for Supabase/Postgres
 -- Run this entire file once in Supabase -> SQL Editor.
 
 create extension if not exists pgcrypto;
