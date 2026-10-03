@@ -1,13 +1,22 @@
-=-- TrackLink database schema for Supabase/Postgres
+-- TrackLink database schema for Supabase/Postgres
 -- Safe to run again when upgrading an existing TrackLink database.
+-- Current schema target: TrackLink v0.3.0
 
 create extension if not exists pgcrypto;
+
+create table if not exists public.link_groups (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  created_at timestamptz not null default now(),
+  constraint link_groups_name_length check (char_length(name) between 1 and 80)
+);
 
 create table if not exists public.links (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   slug text not null unique,
   destination_url text not null,
+  group_id uuid references public.link_groups(id) on delete set null,
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
   constraint links_slug_format check (slug ~ '^[a-z0-9][a-z0-9_-]{0,79}$'),
@@ -24,19 +33,24 @@ create table if not exists public.clicks (
 );
 
 -- Upgrade existing installations.
+alter table public.links
+  add column if not exists group_id uuid references public.link_groups(id) on delete set null;
 alter table public.clicks add column if not exists country_code text;
 alter table public.clicks drop column if exists referrer;
 
+create index if not exists links_group_id_idx on public.links(group_id);
 create index if not exists clicks_link_id_idx on public.clicks(link_id);
 create index if not exists clicks_clicked_at_idx on public.clicks(clicked_at desc);
 create index if not exists clicks_visitor_id_idx on public.clicks(visitor_id);
 create index if not exists clicks_link_clicked_at_idx on public.clicks(link_id, clicked_at desc);
 create index if not exists clicks_country_code_idx on public.clicks(country_code);
 
+alter table public.link_groups enable row level security;
 alter table public.links enable row level security;
 alter table public.clicks enable row level security;
 
 -- Do not expose tracker data to browser/public roles.
+revoke all on table public.link_groups from anon, authenticated;
 revoke all on table public.links from anon, authenticated;
 revoke all on table public.clicks from anon, authenticated;
 
@@ -78,10 +92,13 @@ select
   count(distinct c.visitor_id) filter (
     where date_trunc('month', c.clicked_at at time zone 'Europe/Kyiv') =
       date_trunc('month', now() at time zone 'Europe/Kyiv')
-  )::bigint as month_unique
+  )::bigint as month_unique,
+  l.group_id,
+  g.name as group_name
 from public.links l
+left join public.link_groups g on g.id = l.group_id
 left join public.clicks c on c.link_id = l.id
-group by l.id, l.name, l.slug, l.destination_url, l.is_active, l.created_at;
+group by l.id, l.name, l.slug, l.destination_url, l.is_active, l.created_at, l.group_id, g.name;
 
 -- Existing first four columns are kept for backward compatibility.
 create or replace view public.overall_stats
@@ -141,11 +158,15 @@ select
   c.country_code,
   c.user_agent,
   c.clicked_at,
-  (c.clicked_at at time zone 'Europe/Kyiv')::date as local_day
+  (c.clicked_at at time zone 'Europe/Kyiv')::date as local_day,
+  l.group_id,
+  g.name as group_name
 from public.clicks c
-join public.links l on l.id = c.link_id;
+join public.links l on l.id = c.link_id
+left join public.link_groups g on g.id = l.group_id;
 
 grant usage on schema public to service_role;
+grant all on table public.link_groups to service_role;
 grant all on table public.links to service_role;
 grant all on table public.clicks to service_role;
 grant usage, select on sequence public.clicks_id_seq to service_role;

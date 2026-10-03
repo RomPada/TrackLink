@@ -18,6 +18,7 @@ type Props = {
   selectedPeriod?: PeriodKey | null;
   selectedLinkId?: string | null;
   compact?: boolean;
+  basePath?: string;
 };
 
 function formatNumber(value: number) {
@@ -31,6 +32,7 @@ export default function PeriodStatsGrid({
   selectedPeriod,
   selectedLinkId,
   compact = false,
+  basePath = "/admin",
 }: Props) {
   const items: Array<{
     key: PeriodKey;
@@ -78,7 +80,7 @@ export default function PeriodStatsGrid({
           <a
             key={item.key}
             className={`period-card${active ? " period-card-active" : ""}`}
-            href={`/admin?${params.toString()}#records`}
+            href={`${basePath}?${params.toString()}#records`}
           >
             <div className="period-card-title">{item.label}</div>
             <div className="period-card-metrics">

@@ -28,6 +28,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
           <button className="button button-primary" type="submit">
             Увійти
           </button>
+          <a className="button button-ghost demo-login-button" href="/demo">
+            Відкрити демо
+          </a>
         </form>
       </section>
     </main>

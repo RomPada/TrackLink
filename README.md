@@ -1,6 +1,6 @@
 # TrackLink
 
-Version: **v0.2.0**
+Version: **v0.3.0**
 
 TrackLink is a small self-hosted redirect and click analytics app for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.
 
@@ -18,6 +18,8 @@ All links can redirect to the same destination while keeping separate statistics
 ## Features
 
 - unlimited tracking links;
+- public `/demo` page with static sample data and no Supabase/admin access;
+- link groups for organizing destinations or campaigns such as Patreon, GitHub, and YouTube;
 - short redirect route `/[slug]` instead of `/go/[slug]`;
 - backward compatibility for old `/go/[slug]` links;
 - aggregated statistics for today, the last 7 days, the current month, and all time;
@@ -34,9 +36,9 @@ All links can redirect to the same destination while keeping separate statistics
 - no IP address storage;
 - `referrer` is no longer stored.
 
-## Important upgrade step from v0.1.x
+## Important upgrade step
 
-Version `v0.2.0` changes the database schema.
+Version `v0.3.0` extends the database schema with link groups. If you upgrade from any earlier version, run the latest schema file again.
 
 After updating the code, open **Supabase -> SQL Editor** and run the current file:
 
@@ -44,7 +46,7 @@ After updating the code, open **Supabase -> SQL Editor** and run the current fil
 supabase/schema.sql
 ```
 
-The script is designed to upgrade an existing TrackLink database. It adds the country field, removes the old `referrer` field, and creates the new aggregate/detail views.
+The script is designed to upgrade an existing TrackLink database. It keeps the v0.2.0 analytics/country changes and adds the `link_groups` table plus `group_id` on tracking links. Existing links remain valid and are placed in `No group` until you assign them.
 
 Existing click records remain in the database. Old records will not have country information because it was not collected before v0.2.0.
 
@@ -87,6 +89,10 @@ Admin area:
 
 `http://localhost:3000/admin`
 
+Public demo (no database connection or admin access):
+
+`http://localhost:3000/demo`
+
 A test tracking URL can look like:
 
 `http://localhost:3000/tg`
@@ -115,6 +121,14 @@ After deployment, links can look like:
 - `https://your-project.vercel.app/facebook`
 
 You can later connect a custom domain such as `brand.link`, producing URLs like `https://brand.link/tg`.
+
+## Link groups
+
+Create groups such as `Patreon`, `GitHub`, or `YouTube` and assign any tracking link to one group. Groups are used to organize the admin list; links can be moved between groups at any time. Deleting a group does **not** delete its links — those links become ungrouped.
+
+## Public demo
+
+The login screen includes an `Open demo` button. `/demo` uses static sample data only: it does not connect to Supabase, does not record clicks, and does not grant admin permissions. It is intended for showing the interface and basic analytics flow.
 
 ## Aggregated statistics
 
@@ -152,7 +166,9 @@ Telegram, Facebook, LinkedIn, and similar platforms can open URLs automatically 
 
 ## Data structure
 
-`links` stores tracking links.
+`link_groups` stores optional link groups.
+
+`links` stores tracking links and an optional `group_id`.
 
 `clicks` stores each counted redirect with:
 
@@ -170,6 +186,7 @@ Because tracking links now live at the domain root, these system paths cannot be
 
 - `admin`
 - `login`
+- `demo`
 - `go`
 - `api`
 - `_next`
@@ -178,7 +195,7 @@ Because tracking links now live at the domain root, these system paths cannot be
 
 ### Admin page shows a Supabase error after upgrading
 
-Run the latest `supabase/schema.sql` again in Supabase SQL Editor. Version v0.2.0 requires new fields and database views.
+Run the latest `supabase/schema.sql` again in Supabase SQL Editor. Version v0.3.0 requires the link-groups table/column in addition to the v0.2.0 analytics fields and views.
 
 Also check:
 

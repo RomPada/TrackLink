@@ -6,10 +6,13 @@ import PeriodStatsGrid, {
   type PeriodStats,
 } from "@/components/PeriodStatsGrid";
 import {
+  createGroupAction,
   createLinkAction,
+  deleteGroupAction,
   deleteLinkAction,
   logoutAction,
   toggleLinkAction,
+  updateGroupAction,
   updateLinkAction,
 } from "@/app/actions";
 import { isAdmin } from "@/lib/auth";
@@ -17,6 +20,12 @@ import { APP_NAME, APP_VERSION } from "@/lib/app-meta";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+type LinkGroup = {
+  id: string;
+  name: string;
+  created_at: string;
+};
 
 type LinkStat = {
   id: string;
@@ -34,6 +43,8 @@ type LinkStat = {
   unique_7d: number | string;
   month_clicks: number | string;
   month_unique: number | string;
+  group_id: string | null;
+  group_name: string | null;
 };
 
 type DailyStat = {
@@ -52,6 +63,8 @@ type ClickRecord = {
   user_agent: string | null;
   clicked_at: string;
   local_day: string;
+  group_id: string | null;
+  group_name: string | null;
 };
 
 function number(value: number | string | null | undefined) {
@@ -123,7 +136,7 @@ function toPeriodStats(source: {
   total_clicks?: number | string | null;
   unique_visitors?: number | string | null;
   clicks?: number | string | null;
-}) : PeriodStats {
+}): PeriodStats {
   return {
     todayClicks: Number(source.today_clicks ?? 0),
     todayUnique: Number(source.today_unique ?? 0),
@@ -180,6 +193,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   const weekStartKey = shiftDateKey(todayKey, -6);
   const monthStartKey = `${todayKey.slice(0, 7)}-01`;
 
+  let groups: LinkGroup[] = [];
   let links: LinkStat[] = [];
   let overall = {
     total_clicks: 0,
@@ -198,26 +212,26 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
 
   try {
     const supabase = getSupabaseAdmin();
-    const [linksResult, overallResult, dailyResult] = await Promise.all([
+    const [groupsResult, linksResult, overallResult, dailyResult] = await Promise.all([
+      supabase.from("link_groups").select("*").order("name", { ascending: true }),
       supabase.from("link_stats").select("*").order("created_at", { ascending: false }),
       supabase.from("overall_stats").select("*").maybeSingle(),
       supabase.from("daily_stats").select("*").order("day", { ascending: true }).limit(14),
     ]);
 
-    const firstError = linksResult.error ?? overallResult.error ?? dailyResult.error;
+    const firstError =
+      groupsResult.error ?? linksResult.error ?? overallResult.error ?? dailyResult.error;
 
     if (firstError) {
       const details = [firstError.code, firstError.message, firstError.details, firstError.hint]
         .filter(Boolean)
         .join(" · ");
       databaseError = details || "Supabase повернув невідому помилку.";
-    } else if (
-      overallResult.data &&
-      !("today_clicks" in overallResult.data)
-    ) {
-      databaseError = "Схема Supabase застаріла. Виконай актуальний supabase/schema.sql для TrackLink v0.2.0.";
-      links = (linksResult.data ?? []) as LinkStat[];
+    } else if (overallResult.data && !("today_clicks" in overallResult.data)) {
+      databaseError =
+        "Схема Supabase застаріла. Виконай актуальний supabase/schema.sql для TrackLink v0.3.0.";
     } else {
+      groups = (groupsResult.data ?? []) as LinkGroup[];
       links = (linksResult.data ?? []) as LinkStat[];
       overall = {
         total_clicks: Number(overallResult.data?.total_clicks ?? 0),
@@ -288,6 +302,111 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       ? "Production"
       : "Local development";
 
+  const linksByGroup = new Map<string | null, LinkStat[]>();
+  for (const link of links) {
+    const current = linksByGroup.get(link.group_id) ?? [];
+    current.push(link);
+    linksByGroup.set(link.group_id, current);
+  }
+
+  function renderLinkCard(link: LinkStat) {
+    const trackingUrl = `${baseUrl}/${link.slug}`;
+    const linkStats = toPeriodStats(link);
+
+    return (
+      <article className="link-card" key={link.id}>
+        <div className="link-card-main">
+          <div className="link-title-row">
+            <div>
+              <div className="link-name-line">
+                <h3>{link.name}</h3>
+                {link.group_name ? <span className="group-badge">{link.group_name}</span> : null}
+              </div>
+              <div className="tracking-url">{trackingUrl}</div>
+              <div className="link-last-click">Останній перехід: {formatDate(link.last_click_at)}</div>
+            </div>
+            <span className={`status ${link.is_active ? "status-on" : "status-off"}`}>
+              {link.is_active ? "Активне" : "Вимкнене"}
+            </span>
+          </div>
+
+          <div className="inline-actions">
+            <CopyButton value={trackingUrl} />
+            <a
+              className="button button-ghost button-small"
+              href={`${trackingUrl}?test=1`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Перевірити
+            </a>
+          </div>
+
+          <PeriodStatsGrid
+            stats={linkStats}
+            todayLabel={todayLabel}
+            linkId={link.id}
+            selectedPeriod={selectedPeriod}
+            selectedLinkId={selectedLink?.id ?? null}
+            compact
+          />
+
+          <div className="destination">
+            <span>Куди веде:</span>
+            <a href={link.destination_url} target="_blank" rel="noreferrer">
+              {link.destination_url}
+            </a>
+          </div>
+        </div>
+
+        <details className="link-settings">
+          <summary>Налаштування</summary>
+          <form action={updateLinkAction} className="form-grid compact-form">
+            <input type="hidden" name="id" value={link.id} />
+            <label>
+              Назва
+              <input name="name" defaultValue={link.name} required />
+            </label>
+            <label>
+              Slug
+              <input name="slug" defaultValue={link.slug} pattern="[A-Za-z0-9_-]+" required />
+            </label>
+            <label>
+              Група
+              <select name="groupId" defaultValue={link.group_id ?? ""}>
+                <option value="">Без групи</option>
+                {groups.map((group) => (
+                  <option key={group.id} value={group.id}>{group.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="wide">
+              Кінцева адреса
+              <input name="destinationUrl" type="url" defaultValue={link.destination_url} required />
+            </label>
+            <div className="wide form-actions">
+              <button className="button button-primary button-small" type="submit">Зберегти</button>
+            </div>
+          </form>
+
+          <div className="danger-row">
+            <form action={toggleLinkAction}>
+              <input type="hidden" name="id" value={link.id} />
+              <input type="hidden" name="nextValue" value={String(!link.is_active)} />
+              <button className="button button-ghost button-small" type="submit">
+                {link.is_active ? "Вимкнути" : "Увімкнути"}
+              </button>
+            </form>
+            <form action={deleteLinkAction}>
+              <input type="hidden" name="id" value={link.id} />
+              <button className="button button-danger button-small" type="submit">Видалити</button>
+            </form>
+          </div>
+        </details>
+      </article>
+    );
+  }
+
   return (
     <main className="page-shell">
       <header className="topbar">
@@ -331,7 +450,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             <dl>
               <div><dt>Версія</dt><dd>{APP_VERSION}</dd></div>
               <div><dt>Середовище</dt><dd>{environment}</dd></div>
-              <div><dt>Короткий URL</dt><dd>/{"{slug}"}</dd></div>
+              <div><dt>Короткий URL</dt><dd>/&#123;slug&#125;</dd></div>
             </dl>
           </article>
           <article className="system-card">
@@ -343,6 +462,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             </div>
             <dl>
               <div><dt>Сервіс</dt><dd>Supabase / PostgreSQL</dd></div>
+              <div><dt>Груп</dt><dd>{number(groups.length)}</dd></div>
               <div><dt>Посилань</dt><dd>{number(links.length)}</dd></div>
               <div><dt>Записів переходів</dt><dd>{number(overall.total_clicks)}</dd></div>
               <div><dt>Останній запис</dt><dd>{formatDate(latestClickAt)}</dd></div>
@@ -391,6 +511,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                     <th>Коли</th>
                     <th>Відвідувач</th>
                     <th>Країна</th>
+                    <th>Група</th>
                     <th>Посилання</th>
                     <th>Куди перейшов</th>
                   </tr>
@@ -404,6 +525,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                         <span className="record-secondary">{deviceLabel(record.user_agent)}</span>
                       </td>
                       <td>{countryLabel(record.country_code)}</td>
+                      <td>{record.group_name ?? "Без групи"}</td>
                       <td>
                         <strong>{record.link_name}</strong>
                         <span className="record-secondary">/{record.slug}</span>
@@ -455,8 +577,48 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       <section className="panel">
         <div className="panel-heading">
           <div>
+            <h2>Групи посилань</h2>
+            <p className="muted">Обʼєднуй посилання за сервісами, кампаніями або напрямами.</p>
+          </div>
+        </div>
+
+        <form action={createGroupAction} className="group-create-form">
+          <label>
+            Нова група
+            <input name="name" placeholder="Наприклад: Patreon" required maxLength={80} />
+          </label>
+          <button className="button button-primary" type="submit">Створити групу</button>
+        </form>
+
+        {groups.length > 0 ? (
+          <div className="group-manager-list">
+            {groups.map((group) => (
+              <div className="group-manager-row" key={group.id}>
+                <form action={updateGroupAction} className="group-rename-form">
+                  <input type="hidden" name="id" value={group.id} />
+                  <input name="name" defaultValue={group.name} required maxLength={80} />
+                  <button className="button button-ghost button-small" type="submit">Перейменувати</button>
+                </form>
+                <div className="group-manager-meta">
+                  {number(linksByGroup.get(group.id)?.length ?? 0)} посилань
+                </div>
+                <form action={deleteGroupAction}>
+                  <input type="hidden" name="id" value={group.id} />
+                  <button className="button button-danger button-small" type="submit">Видалити</button>
+                </form>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state group-empty">Груп ще немає. Створи першу, наприклад Patreon.</div>
+        )}
+      </section>
+
+      <section className="panel">
+        <div className="panel-heading">
+          <div>
             <h2>Створити нове посилання</h2>
-            <p className="muted">Наприклад: Telegram → /tg → твій інтернет-магазин.</p>
+            <p className="muted">Наприклад: Telegram → /tg → твій Patreon.</p>
           </div>
         </div>
 
@@ -469,9 +631,18 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             Slug
             <input name="slug" placeholder="tg" pattern="[A-Za-z0-9_-]+" required />
           </label>
+          <label>
+            Група
+            <select name="groupId" defaultValue="">
+              <option value="">Без групи</option>
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>{group.name}</option>
+              ))}
+            </select>
+          </label>
           <label className="wide">
             Кінцева адреса
-            <input name="destinationUrl" type="url" placeholder="https://shop.example.com" required />
+            <input name="destinationUrl" type="url" placeholder="https://patreon.com/yourname" required />
           </label>
           <div className="wide form-actions">
             <button className="button button-primary" type="submit">Створити посилання</button>
@@ -483,92 +654,37 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         <div className="panel-heading">
           <div>
             <h2>Твої посилання</h2>
-            <p className="muted">Превʼю-боти соцмереж і браузерний prefetch не зараховуються.</p>
+            <p className="muted">Посилання згруповані за призначенням. Превʼю-боти та browser prefetch не зараховуються.</p>
           </div>
         </div>
 
         {links.length === 0 ? (
           <div className="empty-state">Створи перше посилання вище.</div>
         ) : (
-          <div className="link-list">
-            {links.map((link) => {
-              const trackingUrl = `${baseUrl}/${link.slug}`;
-              const linkStats = toPeriodStats(link);
-
+          <div className="link-groups-list">
+            {groups.map((group) => {
+              const groupLinks = linksByGroup.get(group.id) ?? [];
+              if (groupLinks.length === 0) return null;
               return (
-                <article className="link-card" key={link.id}>
-                  <div className="link-card-main">
-                    <div className="link-title-row">
-                      <div>
-                        <h3>{link.name}</h3>
-                        <div className="tracking-url">{trackingUrl}</div>
-                        <div className="link-last-click">Останній перехід: {formatDate(link.last_click_at)}</div>
-                      </div>
-                      <span className={`status ${link.is_active ? "status-on" : "status-off"}`}>
-                        {link.is_active ? "Активне" : "Вимкнене"}
-                      </span>
-                    </div>
-
-                    <div className="inline-actions">
-                      <CopyButton value={trackingUrl} />
-                      <a className="button button-ghost button-small" href={`${trackingUrl}?test=1`} target="_blank" rel="noreferrer">
-                        Перевірити
-                      </a>
-                    </div>
-
-                    <PeriodStatsGrid
-                      stats={linkStats}
-                      todayLabel={todayLabel}
-                      linkId={link.id}
-                      selectedPeriod={selectedPeriod}
-                      selectedLinkId={selectedLink?.id ?? null}
-                      compact
-                    />
-
-                    <div className="destination">
-                      <span>Куди веде:</span>
-                      <a href={link.destination_url} target="_blank" rel="noreferrer">{link.destination_url}</a>
-                    </div>
-                  </div>
-
-                  <details className="link-settings">
-                    <summary>Налаштування</summary>
-                    <form action={updateLinkAction} className="form-grid compact-form">
-                      <input type="hidden" name="id" value={link.id} />
-                      <label>
-                        Назва
-                        <input name="name" defaultValue={link.name} required />
-                      </label>
-                      <label>
-                        Slug
-                        <input name="slug" defaultValue={link.slug} pattern="[A-Za-z0-9_-]+" required />
-                      </label>
-                      <label className="wide">
-                        Кінцева адреса
-                        <input name="destinationUrl" type="url" defaultValue={link.destination_url} required />
-                      </label>
-                      <div className="wide form-actions">
-                        <button className="button button-primary button-small" type="submit">Зберегти</button>
-                      </div>
-                    </form>
-
-                    <div className="danger-row">
-                      <form action={toggleLinkAction}>
-                        <input type="hidden" name="id" value={link.id} />
-                        <input type="hidden" name="nextValue" value={String(!link.is_active)} />
-                        <button className="button button-ghost button-small" type="submit">
-                          {link.is_active ? "Вимкнути" : "Увімкнути"}
-                        </button>
-                      </form>
-                      <form action={deleteLinkAction}>
-                        <input type="hidden" name="id" value={link.id} />
-                        <button className="button button-danger button-small" type="submit">Видалити</button>
-                      </form>
-                    </div>
-                  </details>
-                </article>
+                <details className="link-group" key={group.id} open>
+                  <summary className="link-group-heading">
+                    <span>{group.name}</span>
+                    <span className="link-group-count">{number(groupLinks.length)} посилань</span>
+                  </summary>
+                  <div className="link-list">{groupLinks.map(renderLinkCard)}</div>
+                </details>
               );
             })}
+
+            {(linksByGroup.get(null)?.length ?? 0) > 0 ? (
+              <details className="link-group link-group-ungrouped" open>
+                <summary className="link-group-heading">
+                  <span>Без групи</span>
+                  <span className="link-group-count">{number(linksByGroup.get(null)?.length ?? 0)} посилань</span>
+                </summary>
+                <div className="link-list">{(linksByGroup.get(null) ?? []).map(renderLinkCard)}</div>
+              </details>
+            ) : null}
           </div>
         )}
       </section>

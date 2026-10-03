@@ -5,6 +5,41 @@ This file is maintained for every release in English and Ukrainian.
 
 ---
 
+## v0.3.0 — Public demo and link groups
+
+### English
+
+- Added a public `/demo` page accessible from the login screen.
+- Demo mode uses only static sample data and does not connect to Supabase or grant admin permissions.
+- Added demo period analytics, click-detail examples, grouped links, and a read-only create-link form.
+- Added persistent link groups backed by the new `link_groups` Supabase table.
+- Added group selection when creating or editing a tracking link.
+- Added group creation, rename, and deletion in the admin area.
+- Deleting a group keeps its links and moves them to `No group`.
+- Grouped the `Your links` section into collapsible destination/campaign sections.
+- Added group names to detailed click records.
+- Reserved the `/demo` slug so it cannot be used as a tracking link.
+- Updated the application and database schema version to `v0.3.0`.
+
+### Українська
+
+- На сторінку входу додано кнопку для відкриття публічного `/demo`.
+- Демо працює тільки на статичних тестових даних, не підключається до Supabase і не надає адмінських прав.
+- У демо додано приклади статистики за періодами, деталізації переходів, груп посилань і read-only форми створення посилання.
+- Додано постійні групи посилань через нову таблицю Supabase `link_groups`.
+- При створенні та редагуванні посилання можна вибрати групу.
+- В адмінці можна створювати, перейменовувати та видаляти групи.
+- Видалення групи не видаляє посилання — вони переходять у `Без групи`.
+- Секцію `Твої посилання` розбито на згортані групи за ресурсом/кампанією.
+- Назву групи додано до деталізації переходів.
+- Slug `/demo` зарезервовано системою.
+- Версію застосунку та схеми бази оновлено до `v0.3.0`.
+
+**Commit:** `feat: add public demo and link groups`  
+**Release tag:** `v0.3.0`
+
+---
+
 ## v0.2.0 — Period analytics, click details and short URLs
 
 ### English
