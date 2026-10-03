@@ -1,11 +1,12 @@
 # TrackLink
 
-Version: **v0.3.0**
+Version: **v0.4.0**
 
 TrackLink is a small self-hosted redirect and click analytics app for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.
 
 Ukrainian documentation: [README.ua.md](./README.ua.md)  
-Release history: [PATCHLIST.md](./PATCHLIST.md)
+Release history: [PATCHLIST.md](./PATCHLIST.md)  
+Development roadmap: [ROADMAP.md](./ROADMAP.md)
 
 Short tracking URLs look like this:
 
@@ -18,6 +19,8 @@ All links can redirect to the same destination while keeping separate statistics
 ## Features
 
 - unlimited tracking links;
+- English is the default UI language with an EN / UA switcher on login, admin, and demo pages;
+- deletion confirmation dialogs for links and groups;
 - public `/demo` page with static sample data and no Supabase/admin access;
 - link groups for organizing destinations or campaigns such as Patreon, GitHub, and YouTube;
 - short redirect route `/[slug]` instead of `/go/[slug]`;
@@ -38,7 +41,7 @@ All links can redirect to the same destination while keeping separate statistics
 
 ## Important upgrade step
 
-Version `v0.3.0` extends the database schema with link groups. If you upgrade from any earlier version, run the latest schema file again.
+Version `v0.4.0` does **not** require a new database migration. If you are upgrading from a version earlier than `v0.3.0`, note that `v0.3.0` extends the database schema with link groups. If you upgrade from any earlier version, run the latest schema file again.
 
 After updating the code, open **Supabase -> SQL Editor** and run the current file:
 

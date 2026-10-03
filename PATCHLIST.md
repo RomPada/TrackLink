@@ -5,6 +5,39 @@ This file is maintained for every release in English and Ukrainian.
 
 ---
 
+## v0.4.0 — Bilingual UI and safer destructive actions
+
+### English
+
+- Added site-wide EN / UA language switching on login, admin, and demo pages.
+- English is now the default interface language.
+- Language selection is persisted in a cookie.
+- Centered the `Open demo` button label.
+- Updated the password visibility icon so its visual state matches whether the password is hidden or visible.
+- Improved spacing and styling of the `New group` field.
+- Added confirmation dialogs before deleting links or groups.
+- Localized admin action messages, period cards, click details, demo content, and controls.
+- Added `ROADMAP.md` with the planned TrackLink development directions.
+- No database schema migration is required for this release.
+
+### Українська
+
+- Додано перемикання мов EN / UA на сторінці входу, в адмінці та демо.
+- Англійська мова тепер використовується за замовчуванням.
+- Обрана мова зберігається в cookie.
+- Текст кнопки `Відкрити демо` вирівняно по центру.
+- Стан іконки ока тепер відповідає стану пароля: закритий пароль — закрите око, видимий пароль — відкрите око.
+- Покращено відступи та оформлення поля `Нова група`.
+- Додано вікна підтвердження перед видаленням посилань і груп.
+- Локалізовано повідомлення адмінських дій, періоди статистики, деталізацію переходів, демо та елементи керування.
+- Додано `ROADMAP.md` із зафіксованим планом подальшого розвитку TrackLink.
+- Міграція бази даних для цього релізу не потрібна.
+
+**Commit:** `feat: add bilingual UI and delete confirmations`  
+**Release tag:** `v0.4.0`
+
+---
+
 ## v0.3.0 — Public demo and link groups
 
 ### English

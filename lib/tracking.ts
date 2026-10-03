@@ -24,11 +24,11 @@ export async function handleTrackingGet(request: NextRequest, slug: string) {
   const link = await getLink(slug);
 
   if (!link) {
-    return new NextResponse("Посилання не знайдено", { status: 404 });
+    return new NextResponse("Link not found", { status: 404 });
   }
 
   if (!link.is_active) {
-    return new NextResponse("Посилання тимчасово вимкнене", { status: 410 });
+    return new NextResponse("Link is temporarily disabled", { status: 410 });
   }
 
   const response = NextResponse.redirect(link.destination_url, 307);

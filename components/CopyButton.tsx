@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { translations, type Language } from "@/lib/i18n";
 
-export default function CopyButton({ value }: { value: string }) {
+export default function CopyButton({ value, language = "en" }: { value: string; language?: Language }) {
   const [copied, setCopied] = useState(false);
+  const text = translations[language].common;
 
   async function copy() {
     await navigator.clipboard.writeText(value);
@@ -13,7 +15,7 @@ export default function CopyButton({ value }: { value: string }) {
 
   return (
     <button type="button" className="button button-ghost button-small" onClick={copy}>
-      {copied ? "Скопійовано" : "Копіювати"}
+      {copied ? text.copied : text.copy}
     </button>
   );
 }

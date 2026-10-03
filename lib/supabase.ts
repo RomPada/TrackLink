@@ -7,20 +7,20 @@ export function getSupabaseAdmin() {
 
   if (!url || !secretKey) {
     throw new Error(
-      "Не задано SUPABASE_URL або SUPABASE_SECRET_KEY. Перевір файл .env.local."
+      "Missing SUPABASE_URL or SUPABASE_SECRET_KEY. Check the .env.local file."
     );
   }
 
   if (secretKey.startsWith("sb_publishable_")) {
     throw new Error(
-      "У SUPABASE_SECRET_KEY зараз вказаний publishable key. Для TrackLink потрібен серверний Secret key виду sb_secret_..."
+      "SUPABASE_SECRET_KEY currently contains a publishable key. TrackLink requires a server Secret key in the sb_secret_... format."
     );
   }
 
   try {
     new URL(url);
   } catch {
-    throw new Error("SUPABASE_URL має неправильний формат.");
+    throw new Error("SUPABASE_URL has an invalid format.");
   }
 
   return createClient(url, secretKey, {

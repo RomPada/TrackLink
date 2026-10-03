@@ -1,3 +1,5 @@
+import { localeFor, translations, type Language } from "@/lib/i18n";
+
 export type PeriodKey = "today" | "week" | "month" | "all";
 
 export type PeriodStats = {
@@ -14,6 +16,7 @@ export type PeriodStats = {
 type Props = {
   stats: PeriodStats;
   todayLabel: string;
+  language?: Language;
   linkId?: string;
   selectedPeriod?: PeriodKey | null;
   selectedLinkId?: string | null;
@@ -21,49 +24,23 @@ type Props = {
   basePath?: string;
 };
 
-function formatNumber(value: number) {
-  return value.toLocaleString("uk-UA");
-}
-
 export default function PeriodStatsGrid({
   stats,
   todayLabel,
+  language = "en",
   linkId,
   selectedPeriod,
   selectedLinkId,
   compact = false,
   basePath = "/admin",
 }: Props) {
-  const items: Array<{
-    key: PeriodKey;
-    label: string;
-    clicks: number;
-    unique: number;
-  }> = [
-    {
-      key: "today",
-      label: `Сьогодні · ${todayLabel}`,
-      clicks: stats.todayClicks,
-      unique: stats.todayUnique,
-    },
-    {
-      key: "week",
-      label: "За останні 7 днів",
-      clicks: stats.weekClicks,
-      unique: stats.weekUnique,
-    },
-    {
-      key: "month",
-      label: "За місяць",
-      clicks: stats.monthClicks,
-      unique: stats.monthUnique,
-    },
-    {
-      key: "all",
-      label: "Всього",
-      clicks: stats.totalClicks,
-      unique: stats.totalUnique,
-    },
+  const text = translations[language].period;
+  const formatNumber = (value: number) => value.toLocaleString(localeFor(language));
+  const items: Array<{ key: PeriodKey; label: string; clicks: number; unique: number }> = [
+    { key: "today", label: `${text.today} · ${todayLabel}`, clicks: stats.todayClicks, unique: stats.todayUnique },
+    { key: "week", label: text.week, clicks: stats.weekClicks, unique: stats.weekUnique },
+    { key: "month", label: text.month, clicks: stats.monthClicks, unique: stats.monthUnique },
+    { key: "all", label: text.all, clicks: stats.totalClicks, unique: stats.totalUnique },
   ];
 
   return (
@@ -71,10 +48,7 @@ export default function PeriodStatsGrid({
       {items.map((item) => {
         const params = new URLSearchParams({ period: item.key });
         if (linkId) params.set("link", linkId);
-
-        const active =
-          selectedPeriod === item.key &&
-          (linkId ? selectedLinkId === linkId : !selectedLinkId);
+        const active = selectedPeriod === item.key && (linkId ? selectedLinkId === linkId : !selectedLinkId);
 
         return (
           <a
@@ -84,14 +58,8 @@ export default function PeriodStatsGrid({
           >
             <div className="period-card-title">{item.label}</div>
             <div className="period-card-metrics">
-              <div>
-                <span>Унікальні</span>
-                <strong>{formatNumber(item.unique)}</strong>
-              </div>
-              <div>
-                <span>Всього переходів</span>
-                <strong>{formatNumber(item.clicks)}</strong>
-              </div>
+              <div><span>{text.unique}</span><strong>{formatNumber(item.unique)}</strong></div>
+              <div><span>{text.totalClicks}</span><strong>{formatNumber(item.clicks)}</strong></div>
             </div>
           </a>
         );

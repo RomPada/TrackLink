@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Language } from "@/lib/i18n";
 
 function EyeIcon({ crossed }: { crossed: boolean }) {
   if (crossed) {
@@ -22,8 +23,10 @@ function EyeIcon({ crossed }: { crossed: boolean }) {
   );
 }
 
-export default function PasswordField() {
+export default function PasswordField({ language = "en" }: { language?: Language }) {
   const [visible, setVisible] = useState(false);
+  const show = language === "uk" ? "Показати пароль" : "Show password";
+  const hide = language === "uk" ? "Сховати пароль" : "Hide password";
 
   return (
     <div className="password-field">
@@ -37,11 +40,11 @@ export default function PasswordField() {
         type="button"
         className="password-toggle"
         onClick={() => setVisible((current) => !current)}
-        aria-label={visible ? "Сховати пароль" : "Показати пароль"}
+        aria-label={visible ? hide : show}
         aria-pressed={visible}
-        title={visible ? "Сховати пароль" : "Показати пароль"}
+        title={visible ? hide : show}
       >
-        <EyeIcon crossed={visible} />
+        <EyeIcon crossed={!visible} />
       </button>
     </div>
   );

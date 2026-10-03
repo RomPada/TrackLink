@@ -811,3 +811,145 @@ select:focus {
     align-items: flex-start;
   }
 }
+
+/* v0.4.0 — language switcher, confirmations and form polish */
+.demo-login-button {
+  justify-content: center;
+  text-align: center;
+}
+
+.auth-card {
+  position: relative;
+  padding-top: 72px;
+}
+
+.auth-language-switcher {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.language-option {
+  min-width: 38px;
+  height: 34px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .04em;
+}
+
+.language-option:hover {
+  color: var(--text);
+  background: var(--surface-muted);
+}
+
+.language-option-active {
+  color: #ffffff;
+  background: var(--primary);
+}
+
+.language-option-active:hover {
+  color: #ffffff;
+  background: var(--primary-2);
+}
+
+.group-create-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.group-create-form input {
+  min-height: 48px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 3px 10px rgba(15, 23, 42, .04);
+}
+
+.group-create-form input:focus {
+  border-color: #7f95b0;
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+}
+
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, .48);
+  backdrop-filter: blur(3px);
+}
+
+.confirm-dialog {
+  width: min(440px, 100%);
+  border: 1px solid var(--line-strong);
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 22px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, .22);
+}
+
+.confirm-dialog h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.confirm-dialog p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@media (max-width: 520px) {
+  .auth-card {
+    padding-top: 72px;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .confirm-dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .confirm-dialog-actions .button {
+    width: 100%;
+  }
+}

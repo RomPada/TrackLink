@@ -9,6 +9,8 @@ import {
   setAdminSession,
 } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { translations } from "@/lib/i18n";
+import { getLanguage } from "@/lib/language";
 
 const RESERVED_SLUGS = new Set([
   "admin",
@@ -63,9 +65,10 @@ async function requireAdminAction() {
 
 export async function loginAction(formData: FormData) {
   const password = String(formData.get("password") ?? "");
+  const language = await getLanguage();
 
   if (!passwordMatches(password)) {
-    redirect(withMessage("/login", "error", "Неправильний пароль"));
+    redirect(withMessage("/login", "error", translations[language].login.wrongPassword));
   }
 
   await setAdminSession();
@@ -79,47 +82,53 @@ export async function logoutAction() {
 
 export async function createGroupAction(formData: FormData) {
   await requireAdminAction();
+  const language = await getLanguage();
+  const messages = translations[language].actions;
 
   const name = normalizeGroupName(String(formData.get("name") ?? ""));
-  if (!name) redirect(withMessage("/admin", "error", "Введи назву групи"));
+  if (!name) redirect(withMessage("/admin", "error", messages.groupNameRequired));
 
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.from("link_groups").insert({ name });
 
   if (error) {
-    const message = error.code === "23505" ? "Група з такою назвою вже існує" : error.message;
+    const message = error.code === "23505" ? messages.groupExists : error.message;
     redirect(withMessage("/admin", "error", message));
   }
 
   revalidatePath("/admin");
-  redirect(withMessage("/admin", "ok", "Групу створено"));
+  redirect(withMessage("/admin", "ok", messages.groupCreated));
 }
 
 export async function updateGroupAction(formData: FormData) {
   await requireAdminAction();
+  const language = await getLanguage();
+  const messages = translations[language].actions;
 
   const id = String(formData.get("id") ?? "").trim();
   const name = normalizeGroupName(String(formData.get("name") ?? ""));
 
-  if (!id || !name) redirect(withMessage("/admin", "error", "Перевір дані групи"));
+  if (!id || !name) redirect(withMessage("/admin", "error", messages.groupDataInvalid));
 
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.from("link_groups").update({ name }).eq("id", id);
 
   if (error) {
-    const message = error.code === "23505" ? "Група з такою назвою вже існує" : error.message;
+    const message = error.code === "23505" ? messages.groupExists : error.message;
     redirect(withMessage("/admin", "error", message));
   }
 
   revalidatePath("/admin");
-  redirect(withMessage("/admin", "ok", "Групу перейменовано"));
+  redirect(withMessage("/admin", "ok", messages.groupRenamed));
 }
 
 export async function deleteGroupAction(formData: FormData) {
   await requireAdminAction();
+  const language = await getLanguage();
+  const messages = translations[language].actions;
 
   const id = String(formData.get("id") ?? "").trim();
-  if (!id) redirect(withMessage("/admin", "error", "Групу не знайдено"));
+  if (!id) redirect(withMessage("/admin", "error", messages.groupNotFound));
 
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.from("link_groups").delete().eq("id", id);
@@ -127,11 +136,13 @@ export async function deleteGroupAction(formData: FormData) {
   if (error) redirect(withMessage("/admin", "error", error.message));
 
   revalidatePath("/admin");
-  redirect(withMessage("/admin", "ok", "Групу видалено. Посилання перенесено в «Без групи»"));
+  redirect(withMessage("/admin", "ok", messages.groupDeleted));
 }
 
 export async function createLinkAction(formData: FormData) {
   await requireAdminAction();
+  const language = await getLanguage();
+  const messages = translations[language].actions;
 
   const name = String(formData.get("name") ?? "").trim();
   const slug = normalizeSlug(String(formData.get("slug") ?? ""));
@@ -139,16 +150,16 @@ export async function createLinkAction(formData: FormData) {
   const groupId = normalizeGroupId(formData.get("groupId"));
 
   if (!name || !slug || !destinationUrl) {
-    redirect(withMessage("/admin", "error", "Заповни всі обовʼязкові поля"));
+    redirect(withMessage("/admin", "error", messages.requiredFields));
   }
 
   if (isReservedSlug(slug)) {
-    redirect(withMessage("/admin", "error", "Цей slug зарезервований системою. Обери інший."));
+    redirect(withMessage("/admin", "error", messages.reservedSlug));
   }
 
   if (!isHttpUrl(destinationUrl)) {
     redirect(
-      withMessage("/admin", "error", "Кінцева адреса має починатися з http:// або https://")
+      withMessage("/admin", "error", messages.invalidUrl)
     );
   }
 
@@ -161,16 +172,18 @@ export async function createLinkAction(formData: FormData) {
   });
 
   if (error) {
-    const message = error.code === "23505" ? "Такий slug уже існує" : error.message;
+    const message = error.code === "23505" ? messages.slugExists : error.message;
     redirect(withMessage("/admin", "error", message));
   }
 
   revalidatePath("/admin");
-  redirect(withMessage("/admin", "ok", "Посилання створено"));
+  redirect(withMessage("/admin", "ok", messages.linkCreated));
 }
 
 export async function updateLinkAction(formData: FormData) {
   await requireAdminAction();
+  const language = await getLanguage();
+  const messages = translations[language].actions;
 
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
@@ -179,11 +192,11 @@ export async function updateLinkAction(formData: FormData) {
   const groupId = normalizeGroupId(formData.get("groupId"));
 
   if (!id || !name || !slug || !destinationUrl || !isHttpUrl(destinationUrl)) {
-    redirect(withMessage("/admin", "error", "Перевір дані посилання"));
+    redirect(withMessage("/admin", "error", messages.linkDataInvalid));
   }
 
   if (isReservedSlug(slug)) {
-    redirect(withMessage("/admin", "error", "Цей slug зарезервований системою. Обери інший."));
+    redirect(withMessage("/admin", "error", messages.reservedSlug));
   }
 
   const supabase = getSupabaseAdmin();
@@ -193,12 +206,12 @@ export async function updateLinkAction(formData: FormData) {
     .eq("id", id);
 
   if (error) {
-    const message = error.code === "23505" ? "Такий slug уже існує" : error.message;
+    const message = error.code === "23505" ? messages.slugExists : error.message;
     redirect(withMessage("/admin", "error", message));
   }
 
   revalidatePath("/admin");
-  redirect(withMessage("/admin", "ok", "Посилання оновлено"));
+  redirect(withMessage("/admin", "ok", messages.linkUpdated));
 }
 
 export async function toggleLinkAction(formData: FormData) {
@@ -220,6 +233,8 @@ export async function toggleLinkAction(formData: FormData) {
 
 export async function deleteLinkAction(formData: FormData) {
   await requireAdminAction();
+  const language = await getLanguage();
+  const messages = translations[language].actions;
 
   const id = String(formData.get("id") ?? "");
   const supabase = getSupabaseAdmin();
@@ -228,5 +243,5 @@ export async function deleteLinkAction(formData: FormData) {
   if (error) redirect(withMessage("/admin", "error", error.message));
 
   revalidatePath("/admin");
-  redirect(withMessage("/admin", "ok", "Посилання видалено"));
+  redirect(withMessage("/admin", "ok", messages.linkDeleted));
 }
