@@ -1,8 +1,11 @@
 # TrackLink
 
-Версія: **v0.1.3**
+Версія: **v0.1.4**
 
 TrackLink — це невеликий self-hosted трекер переходів для Telegram, Facebook, Instagram, реклами, email-кампаній, Patreon-посилань та інших джерел трафіку.
+
+Основний README англійською: [README.md](./README.md)  
+Історія версій: [PATCHLIST.md](./PATCHLIST.md)
 
 Приклади посилань:
 
