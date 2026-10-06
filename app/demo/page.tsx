@@ -275,8 +275,8 @@ export default async function DemoPage({ searchParams }: { searchParams: SearchP
           {groups.map((group) => {
             const groupLinks = demoLinks.filter((link) => link.group === group.name);
             return (
-              <details className="link-group" key={group.name} open>
-                <summary className="link-group-heading" style={{ backgroundColor: group.color }}><span><span className="group-color-dot" style={{ backgroundColor: group.color }} aria-hidden="true" />{group.name}</span><span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span></summary>
+              <details className="link-group" key={group.name} open style={{ backgroundColor: group.color }}>
+                <summary className="link-group-heading"><span><span className="group-color-dot" style={{ backgroundColor: group.color }} aria-hidden="true" />{group.name}</span><span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span></summary>
                 <div className="link-group-controls" style={{ backgroundColor: group.color }}>
                   <div><strong>{text.groups.backgroundColor}</strong><span>{text.groups.colorHint}</span></div>
                   <div className="group-color-picker demo-color-picker" aria-hidden="true">

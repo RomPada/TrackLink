@@ -572,8 +572,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
               const groupLinks = linksByGroup.get(group.id) ?? [];
               const groupColor = normalizeGroupColor(group.background_color);
               return (
-                <details className="link-group" key={group.id} open>
-                  <summary className="link-group-heading" style={{ backgroundColor: groupColor }}>
+                <details className="link-group" key={group.id} open style={{ backgroundColor: groupColor }}>
+                  <summary className="link-group-heading">
                     <span className="link-group-title">
                       <span className="group-color-dot" style={{ backgroundColor: groupColor }} aria-hidden="true" />
                       {group.name}
@@ -581,7 +581,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                     <span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span>
                   </summary>
 
-                  <div className="link-group-controls" style={{ backgroundColor: groupColor }}>
+                  <div className="link-group-controls">
                     <div>
                       <strong>{text.groups.backgroundColor}</strong>
                       <span>{text.groups.colorHint}</span>

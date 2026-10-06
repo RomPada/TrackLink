@@ -1,6 +1,6 @@
 # TrackLink
 
-Версія: **v0.4.2**
+Версія: **v0.4.3**
 
 TrackLink — це невеликий self-hosted сервіс редиректів та аналітики переходів для Telegram, Facebook, Instagram, реклами, email-кампаній, Patreon-посилань та інших джерел трафіку.
 
@@ -41,10 +41,10 @@ TrackLink — це невеликий self-hosted сервіс редирект�
 
 ## Важливий крок при оновленні
 
-Версія `v0.4.2` потребує одноразової міграції для кольорів груп. Якщо бачиш помилку `Could not find the background_color column ... in the schema cache`, відкрий **Supabase -> SQL Editor** і виконай:
+Версія `v0.4.3` потребує одноразової міграції для кольорів груп. Якщо бачиш помилку `Could not find the background_color column ... in the schema cache`, відкрий **Supabase -> SQL Editor** і виконай:
 
 ```text
-supabase/migrations/v0.4.2_group_colors.sql
+supabase/migrations/v0.4.3_group_colors.sql
 ```
 
 Ця міграція створює `background_color` і примусово оновлює schema cache Supabase/PostgREST. Замість окремої міграції також можна повторно виконати весь актуальний файл:

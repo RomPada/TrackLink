@@ -6,6 +6,32 @@ This file is maintained for every release in English and Ukrainian.
 ---
 
 
+## v0.4.3 — Group background and in-place color updates
+
+### English
+
+- Removed the success banner after changing a group color.
+- Group color changes now update in place without redirecting the admin page to the top.
+- Applied the selected pastel color to the full group container, not only its header and color controls.
+- Kept individual link cards light for readability while showing the group color around them.
+- Updated the demo page to reflect the same full-group background behavior.
+- No new database migration is required if the v0.4.2 group-color migration has already been applied.
+
+### Українська
+
+- Прибрано зелене повідомлення після зміни кольору групи.
+- Зміна кольору тепер оновлюється на місці без перекидання адмінки на початок сторінки.
+- Обраний пастельний колір застосовується до всього контейнера групи, а не лише до заголовка та панелі вибору кольору.
+- Самі картки посилань залишено світлими для читабельності, але фон навколо них показує колір відповідної групи.
+- Демо-сторінку оновлено за тією самою логікою повного фону групи.
+- Нова міграція бази не потрібна, якщо міграцію кольорів із v0.4.2 уже виконано.
+
+**Commit:** `fix: preserve scroll and apply color to full group`  
+**Release tag:** `v0.4.3`
+
+---
+
+
 ## v0.4.2 — Group color placement and Supabase migration fix
 
 ### English

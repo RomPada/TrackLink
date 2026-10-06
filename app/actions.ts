@@ -154,7 +154,7 @@ export async function updateGroupColorAction(formData: FormData) {
   }
 
   revalidatePath("/admin");
-  redirect(withMessage("/admin", "ok", messages.groupColorUpdated));
+  return;
 }
 
 export async function deleteGroupAction(formData: FormData) {

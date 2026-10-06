@@ -1431,3 +1431,27 @@ select option {
     gap: 12px;
   }
 }
+
+
+/* v0.4.3 — preserve scroll on color changes and tint the full group container */
+.link-group {
+  background-clip: padding-box;
+}
+
+.link-group .link-group-heading,
+.link-group .link-group-controls,
+.link-group > .link-list {
+  background-color: transparent;
+}
+
+.link-group > .link-list {
+  border-top: 1px solid rgba(15, 23, 42, .08);
+}
+
+.link-group .link-card {
+  background: rgba(255, 255, 255, .94);
+}
+
+.link-group .link-group-empty {
+  background: rgba(255, 255, 255, .76);
+}
