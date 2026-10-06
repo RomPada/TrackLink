@@ -4,8 +4,14 @@ import PeriodStatsGrid, { type PeriodKey, type PeriodStats } from "@/components/
 import { APP_NAME, APP_VERSION } from "@/lib/app-meta";
 import { linksCountLabel, localeFor, translations, type Language } from "@/lib/i18n";
 import { getLanguage } from "@/lib/language";
+import { DEFAULT_GROUP_COLOR } from "@/lib/group-colors";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+type DemoGroup = {
+  name: string;
+  color: string;
+};
 
 type DemoLink = {
   id: string;
@@ -111,6 +117,13 @@ const demoLinks: DemoLink[] = [
   },
 ];
 
+
+const demoGroups: DemoGroup[] = [
+  { name: "Patreon", color: "#f6e9e3" },
+  { name: "GitHub", color: "#e8eef7" },
+  { name: "YouTube", color: "#f7e8ee" },
+];
+
 const overallStats: PeriodStats = {
   todayClicks: 80,
   todayUnique: 63,
@@ -157,7 +170,7 @@ export default async function DemoPage({ searchParams }: { searchParams: SearchP
   const selectedLink = selectedLinkId ? demoLinks.find((link) => link.id === selectedLinkId) ?? null : null;
   const todayLabel = dateLabel(language);
   const records = makeDemoRecords().filter((record) => !selectedLink || record.linkId === selectedLink.id);
-  const groups = ["Patreon", "GitHub", "YouTube"];
+  const groups = demoGroups;
   const chart = [18, 24, 31, 27, 42, 36, 55, 49, 61, 44, 72, 65, 58, 80];
   const maxDaily = Math.max(...chart);
   const deviceText = text.device;
@@ -260,10 +273,10 @@ export default async function DemoPage({ searchParams }: { searchParams: SearchP
         <div className="panel-heading"><div><h2>{text.demo.yourLinksTitle}</h2><p className="muted">{text.demo.yourLinksDescription}</p></div></div>
         <div className="link-groups-list">
           {groups.map((group) => {
-            const groupLinks = demoLinks.filter((link) => link.group === group);
+            const groupLinks = demoLinks.filter((link) => link.group === group.name);
             return (
-              <details className="link-group" key={group} open>
-                <summary className="link-group-heading"><span>{group}</span><span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span></summary>
+              <details className="link-group" key={group.name} open>
+                <summary className="link-group-heading" style={{ backgroundColor: group.color }}><span><span className="group-color-dot" style={{ backgroundColor: group.color }} aria-hidden="true" />{group.name}</span><span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span></summary>
                 <div className="link-list">
                   {groupLinks.map((link) => {
                     const demoUrl = `https://go.brand.link/${link.slug}`;
@@ -272,7 +285,7 @@ export default async function DemoPage({ searchParams }: { searchParams: SearchP
                         <div className="link-card-main">
                           <div className="link-title-row">
                             <div>
-                              <div className="link-name-line"><h3>{link.name}</h3><span className="group-badge">{link.group}</span></div>
+                              <div className="link-name-line"><h3>{link.name}</h3><span className="group-badge" style={{ backgroundColor: demoGroups.find((item) => item.name === link.group)?.color ?? DEFAULT_GROUP_COLOR }}>{link.group}</span></div>
                               <div className="tracking-url">{demoUrl}</div>
                               <div className="link-last-click">{text.common.lastClick} {text.demo.lastClickMinutes(link.lastClickMinutes)}</div>
                             </div>

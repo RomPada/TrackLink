@@ -5,6 +5,34 @@ This file is maintained for every release in English and Ukrainian.
 
 ---
 
+
+## v0.4.1 — Group styling polish and pastel color coding
+
+### English
+
+- Refined the group-name field styling and spacing in the group manager.
+- Restyled group selectors and dropdown fields to look cleaner and more consistent.
+- Added pastel background color presets for link groups.
+- Added background-color selection when creating or editing a group.
+- Applied selected group colors to grouped link sections and group badges.
+- Updated the demo page to reflect group color styling.
+- Added the `background_color` field to the Supabase schema upgrade script.
+
+### Українська
+
+- Покращено вигляд рамки та відступів у полі назви групи.
+- Оновлено стилі випадаючих списків, щоб вони виглядали акуратніше й сучасніше.
+- Додано пастельні приглушені кольори фону для груп посилань.
+- Додано вибір кольору під час створення та редагування групи.
+- Обраний колір тепер застосовується до секцій груп у списку посилань і до бейджів груп.
+- Оновлено демо-сторінку, щоб вона теж показувала кольорові групи.
+- Оновлено `supabase/schema.sql`: додано поле `background_color`.
+
+**Commit:** `feat: add group color themes and polish group inputs`  
+**Release tag:** `v0.4.1`
+
+---
+
 ## v0.4.0 — Bilingual UI and safer destructive actions
 
 ### English

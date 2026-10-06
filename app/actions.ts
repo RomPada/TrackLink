@@ -9,6 +9,7 @@ import {
   setAdminSession,
 } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { normalizeGroupColor } from "@/lib/group-colors";
 import { translations } from "@/lib/i18n";
 import { getLanguage } from "@/lib/language";
 
@@ -86,10 +87,11 @@ export async function createGroupAction(formData: FormData) {
   const messages = translations[language].actions;
 
   const name = normalizeGroupName(String(formData.get("name") ?? ""));
+  const backgroundColor = normalizeGroupColor(String(formData.get("backgroundColor") ?? ""));
   if (!name) redirect(withMessage("/admin", "error", messages.groupNameRequired));
 
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from("link_groups").insert({ name });
+  const { error } = await supabase.from("link_groups").insert({ name, background_color: backgroundColor });
 
   if (error) {
     const message = error.code === "23505" ? messages.groupExists : error.message;
@@ -107,11 +109,12 @@ export async function updateGroupAction(formData: FormData) {
 
   const id = String(formData.get("id") ?? "").trim();
   const name = normalizeGroupName(String(formData.get("name") ?? ""));
+  const backgroundColor = normalizeGroupColor(String(formData.get("backgroundColor") ?? ""));
 
   if (!id || !name) redirect(withMessage("/admin", "error", messages.groupDataInvalid));
 
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from("link_groups").update({ name }).eq("id", id);
+  const { error } = await supabase.from("link_groups").update({ name, background_color: backgroundColor }).eq("id", id);
 
   if (error) {
     const message = error.code === "23505" ? messages.groupExists : error.message;

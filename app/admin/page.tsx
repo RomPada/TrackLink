@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
 import CopyButton from "@/components/CopyButton";
+import GroupColorPicker from "@/components/GroupColorPicker";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PeriodStatsGrid, { type PeriodKey, type PeriodStats } from "@/components/PeriodStatsGrid";
 import {
@@ -24,10 +25,11 @@ import {
 } from "@/lib/i18n";
 import { getLanguage } from "@/lib/language";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { DEFAULT_GROUP_COLOR, normalizeGroupColor } from "@/lib/group-colors";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-type LinkGroup = { id: string; name: string; created_at: string };
+type LinkGroup = { id: string; name: string; background_color: string | null; created_at: string };
 type LinkStat = {
   id: string;
   name: string;
@@ -273,6 +275,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   const environment = process.env.VERCEL ? "Vercel" : process.env.NODE_ENV === "production" ? "Production" : "Local development";
 
   const linksByGroup = new Map<string | null, LinkStat[]>();
+  const groupsById = new Map(groups.map((group) => [group.id, group] as const));
   for (const link of links) {
     const current = linksByGroup.get(link.group_id) ?? [];
     current.push(link);
@@ -282,6 +285,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   function renderLinkCard(link: LinkStat) {
     const trackingUrl = `${baseUrl}/${link.slug}`;
     const linkStats = toPeriodStats(link);
+    const groupColor = link.group_id ? normalizeGroupColor(groupsById.get(link.group_id)?.background_color) : DEFAULT_GROUP_COLOR;
 
     return (
       <article className="link-card" key={link.id}>
@@ -290,7 +294,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             <div>
               <div className="link-name-line">
                 <h3>{link.name}</h3>
-                {link.group_name ? <span className="group-badge">{link.group_name}</span> : null}
+                {link.group_name ? <span className="group-badge" style={{ backgroundColor: groupColor }}>{link.group_name}</span> : null}
               </div>
               <div className="tracking-url">{trackingUrl}</div>
               <div className="link-last-click">{text.common.lastClick} {formatDate(link.last_click_at, language)}</div>
@@ -331,7 +335,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             <label>{text.createLink.slug}<input name="slug" defaultValue={link.slug} pattern="[A-Za-z0-9_-]+" required /></label>
             <label>
               {text.createLink.group}
-              <select name="groupId" defaultValue={link.group_id ?? ""}>
+              <select name="groupId" className="pretty-select" defaultValue={link.group_id ?? ""}>
                 <option value="">{text.common.noGroup}</option>
                 {groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
               </select>
@@ -479,32 +483,64 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       <section className="panel">
         <div className="panel-heading"><div><h2>{text.groups.title}</h2><p className="muted">{text.groups.description}</p></div></div>
         <form action={createGroupAction} className="group-create-form">
-          <label>{text.groups.newGroup}<input name="name" placeholder={text.groups.placeholder} required maxLength={80} /></label>
+          <label className="group-field">
+            <span className="group-field-label">{text.groups.newGroup}</span>
+            <div className="group-name-wrap">
+              <span className="group-color-dot" style={{ backgroundColor: DEFAULT_GROUP_COLOR }} aria-hidden="true" />
+              <input className="group-name-input" name="name" placeholder={text.groups.placeholder} required maxLength={80} />
+            </div>
+          </label>
+          <label className="group-field">
+            <span className="group-field-label">{text.groups.backgroundColor}</span>
+            <GroupColorPicker name="backgroundColor" selectedColor={DEFAULT_GROUP_COLOR} language={language} idPrefix="create-group-color" />
+          </label>
           <button className="button button-primary" type="submit">{text.groups.create}</button>
         </form>
 
         {groups.length > 0 ? (
           <div className="group-manager-list">
-            {groups.map((group) => (
-              <div className="group-manager-row" key={group.id}>
-                <form action={updateGroupAction} className="group-rename-form">
-                  <input type="hidden" name="id" value={group.id} />
-                  <input name="name" defaultValue={group.name} required maxLength={80} />
-                  <button className="button button-ghost button-small" type="submit">{text.common.rename}</button>
-                </form>
-                <div className="group-manager-meta">{linksCountLabel(linksByGroup.get(group.id)?.length ?? 0, language)}</div>
-                <form action={deleteGroupAction}>
-                  <input type="hidden" name="id" value={group.id} />
-                  <ConfirmSubmitButton
-                    label={text.common.delete}
-                    title={text.groups.confirmTitle}
-                    message={text.groups.confirmBody}
-                    cancelLabel={text.common.cancel}
-                    confirmLabel={text.common.delete}
-                  />
-                </form>
-              </div>
-            ))}
+            {groups.map((group) => {
+              const groupColor = normalizeGroupColor(group.background_color);
+              return (
+                <div className="group-manager-row" key={group.id}>
+                  <form action={updateGroupAction} className="group-rename-form">
+                    <input type="hidden" name="id" value={group.id} />
+                    <div className="group-edit-main">
+                      <label className="group-field">
+                        <span className="group-field-label">{text.groups.newGroup}</span>
+                        <div className="group-name-wrap">
+                          <span className="group-color-dot" style={{ backgroundColor: groupColor }} aria-hidden="true" />
+                          <input className="group-name-input" name="name" defaultValue={group.name} required maxLength={80} />
+                        </div>
+                      </label>
+                      <label className="group-field">
+                        <span className="group-field-label">{text.groups.backgroundColor}</span>
+                        <GroupColorPicker
+                          name="backgroundColor"
+                          selectedColor={groupColor}
+                          language={language}
+                          idPrefix={`group-${group.id}-color`}
+                        />
+                      </label>
+                    </div>
+                    <div className="group-manager-side">
+                      <div className="group-manager-meta">{linksCountLabel(linksByGroup.get(group.id)?.length ?? 0, language)}</div>
+                      <button className="button button-ghost button-small" type="submit">{text.common.save}</button>
+                    </div>
+                  </form>
+                  <form action={deleteGroupAction} className="group-delete-form">
+                    <input type="hidden" name="id" value={group.id} />
+                    <ConfirmSubmitButton
+                      label={text.common.delete}
+                      title={text.groups.confirmTitle}
+                      message={text.groups.confirmBody}
+                      cancelLabel={text.common.cancel}
+                      confirmLabel={text.common.delete}
+                    />
+                  </form>
+                </div>
+              );
+            })}
           </div>
         ) : <div className="empty-state group-empty">{text.groups.noGroups}</div>}
       </section>
@@ -516,7 +552,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           <label>{text.createLink.slug}<input name="slug" placeholder="tg" pattern="[A-Za-z0-9_-]+" required /></label>
           <label>
             {text.createLink.group}
-            <select name="groupId" defaultValue=""><option value="">{text.common.noGroup}</option>{groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select>
+            <select name="groupId" className="pretty-select" defaultValue=""><option value="">{text.common.noGroup}</option>{groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select>
           </label>
           <label className="wide">{text.createLink.destination}<input name="destinationUrl" type="url" placeholder="https://patreon.com/yourname" required /></label>
           <div className="wide form-actions"><button className="button button-primary" type="submit">{text.createLink.create}</button></div>
@@ -532,14 +568,14 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
               if (groupLinks.length === 0) return null;
               return (
                 <details className="link-group" key={group.id} open>
-                  <summary className="link-group-heading"><span>{group.name}</span><span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span></summary>
+                  <summary className="link-group-heading" style={{ backgroundColor: normalizeGroupColor(group.background_color) }}><span><span className="group-color-dot" style={{ backgroundColor: normalizeGroupColor(group.background_color) }} aria-hidden="true" />{group.name}</span><span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span></summary>
                   <div className="link-list">{groupLinks.map(renderLinkCard)}</div>
                 </details>
               );
             })}
             {(linksByGroup.get(null)?.length ?? 0) > 0 ? (
               <details className="link-group link-group-ungrouped" open>
-                <summary className="link-group-heading"><span>{text.common.noGroup}</span><span className="link-group-count">{linksCountLabel(linksByGroup.get(null)?.length ?? 0, language)}</span></summary>
+                <summary className="link-group-heading"><span><span className="group-color-dot" style={{ backgroundColor: DEFAULT_GROUP_COLOR }} aria-hidden="true" />{text.common.noGroup}</span><span className="link-group-count">{linksCountLabel(linksByGroup.get(null)?.length ?? 0, language)}</span></summary>
                 <div className="link-list">{(linksByGroup.get(null) ?? []).map(renderLinkCard)}</div>
               </details>
             ) : null}

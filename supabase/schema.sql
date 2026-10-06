@@ -1,12 +1,13 @@
 -- TrackLink database schema for Supabase/Postgres
 -- Safe to run again when upgrading an existing TrackLink database.
--- Current schema target: TrackLink v0.3.0
+-- Current schema target: TrackLink v0.4.1
 
 create extension if not exists pgcrypto;
 
 create table if not exists public.link_groups (
   id uuid primary key default gen_random_uuid(),
   name text not null unique,
+  background_color text not null default '#e8eef7',
   created_at timestamptz not null default now(),
   constraint link_groups_name_length check (char_length(name) between 1 and 80)
 );
@@ -35,6 +36,10 @@ create table if not exists public.clicks (
 -- Upgrade existing installations.
 alter table public.links
   add column if not exists group_id uuid references public.link_groups(id) on delete set null;
+alter table public.link_groups add column if not exists background_color text;
+update public.link_groups set background_color = '#e8eef7' where background_color is null or btrim(background_color) = '';
+alter table public.link_groups alter column background_color set default '#e8eef7';
+alter table public.link_groups alter column background_color set not null;
 alter table public.clicks add column if not exists country_code text;
 alter table public.clicks drop column if exists referrer;
 

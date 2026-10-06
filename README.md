@@ -1,6 +1,7 @@
 # TrackLink
 
-Version: **v0.4.0**
+Version: **v0.4.1**
+
 
 TrackLink is a small self-hosted redirect and click analytics app for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.
 
@@ -23,6 +24,7 @@ All links can redirect to the same destination while keeping separate statistics
 - deletion confirmation dialogs for links and groups;
 - public `/demo` page with static sample data and no Supabase/admin access;
 - link groups for organizing destinations or campaigns such as Patreon, GitHub, and YouTube;
+- pastel background color presets for every group;
 - short redirect route `/[slug]` instead of `/go/[slug]`;
 - backward compatibility for old `/go/[slug]` links;
 - aggregated statistics for today, the last 7 days, the current month, and all time;
@@ -41,7 +43,7 @@ All links can redirect to the same destination while keeping separate statistics
 
 ## Important upgrade step
 
-Version `v0.4.0` does **not** require a new database migration. If you are upgrading from a version earlier than `v0.3.0`, note that `v0.3.0` extends the database schema with link groups. If you upgrade from any earlier version, run the latest schema file again.
+Version `v0.4.1` adds group background colors, so rerun the latest schema file once after updating. If you are upgrading from a version earlier than `v0.3.0`, note that `v0.3.0` also extends the database schema with link groups. If you are upgrading from a version earlier than `v0.3.0`, note that `v0.3.0` extends the database schema with link groups. If you upgrade from any earlier version, run the latest schema file again.
 
 After updating the code, open **Supabase -> SQL Editor** and run the current file:
 
@@ -49,7 +51,7 @@ After updating the code, open **Supabase -> SQL Editor** and run the current fil
 supabase/schema.sql
 ```
 
-The script is designed to upgrade an existing TrackLink database. It keeps the v0.2.0 analytics/country changes and adds the `link_groups` table plus `group_id` on tracking links. Existing links remain valid and are placed in `No group` until you assign them.
+The script is designed to upgrade an existing TrackLink database. It keeps the v0.2.0 analytics/country changes, adds the `link_groups` table plus `group_id` on tracking links, and adds `background_color` for colored group sections. Existing links remain valid and are placed in `No group` until you assign them.
 
 Existing click records remain in the database. Old records will not have country information because it was not collected before v0.2.0.
 

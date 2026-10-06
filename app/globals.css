@@ -621,19 +621,40 @@ h3 { margin-bottom: 4px; font-size: 20px; }
 select {
   width: 100%;
   min-height: 48px;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid var(--line-strong);
-  background: var(--surface-soft);
-  padding: 0 14px;
+  background-color: var(--panel-soft);
+  padding: 0 42px 0 14px;
   color: var(--text);
   outline: none;
-  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6b7d96 50%),
+    linear-gradient(135deg, #6b7d96 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease, transform .18s ease;
+}
+
+select:hover {
+  background-color: #ffffff;
+  border-color: #a6b5c8;
 }
 
 select:focus {
   border-color: #7f95b0;
-  background: #ffffff;
+  background-color: #ffffff;
   box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+}
+
+select option {
+  color: var(--text);
+  background: #ffffff;
 }
 
 .demo-login-button {
@@ -951,5 +972,204 @@ select:focus {
 
   .confirm-dialog-actions .button {
     width: 100%;
+  }
+}
+
+
+.group-field {
+  display: grid;
+  gap: 10px;
+}
+
+.group-field-label {
+  display: inline-block;
+  padding-left: 2px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.group-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
+}
+
+.group-name-wrap:focus-within {
+  border-color: #7f95b0;
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+}
+
+.group-name-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.group-name-input:focus {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.group-color-dot {
+  display: inline-flex;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  flex: 0 0 auto;
+}
+
+.group-color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 54px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+}
+
+.group-color-option {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.group-color-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.group-color-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.group-color-option:hover .group-color-swatch {
+  transform: translateY(-1px);
+  border-color: rgba(15, 23, 42, 0.22);
+}
+
+.group-color-option input:focus-visible + .group-color-swatch {
+  outline: 3px solid rgba(15, 23, 42, 0.12);
+  outline-offset: 2px;
+}
+
+.group-color-option input:checked + .group-color-swatch {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(11, 23, 48, 0.14), inset 0 1px 0 rgba(255,255,255,.85);
+  transform: scale(1.02);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.group-create-form {
+  grid-template-columns: minmax(240px, 1.2fr) minmax(220px, .9fr) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.group-manager-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: var(--shadow);
+}
+
+.group-rename-form {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.group-edit-main {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.1fr) minmax(240px, .9fr);
+  gap: 14px;
+}
+
+.group-manager-side {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+  align-self: stretch;
+}
+
+.group-manager-meta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel-soft);
+  font-weight: 700;
+}
+
+.group-delete-form {
+  align-self: start;
+}
+
+.link-group-heading {
+  box-shadow: inset 0 -1px 0 var(--line-strong);
+}
+
+.link-group-heading > span:first-child {
+  gap: 10px;
+}
+
+.link-group-count {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  color: #3e526f;
+}
+
+.group-badge {
+  border-color: rgba(15, 23, 42, 0.10);
+  color: #324766;
+}
+
+@media (max-width: 980px) {
+  .group-create-form,
+  .group-rename-form,
+  .group-edit-main,
+  .group-manager-row {
+    grid-template-columns: 1fr;
+  }
+
+  .group-manager-side,
+  .group-delete-form {
+    justify-items: start;
   }
 }
