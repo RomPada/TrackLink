@@ -87,11 +87,10 @@ export async function createGroupAction(formData: FormData) {
   const messages = translations[language].actions;
 
   const name = normalizeGroupName(String(formData.get("name") ?? ""));
-  const backgroundColor = normalizeGroupColor(String(formData.get("backgroundColor") ?? ""));
   if (!name) redirect(withMessage("/admin", "error", messages.groupNameRequired));
 
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from("link_groups").insert({ name, background_color: backgroundColor });
+  const { error } = await supabase.from("link_groups").insert({ name });
 
   if (error) {
     const message = error.code === "23505" ? messages.groupExists : error.message;
@@ -109,12 +108,11 @@ export async function updateGroupAction(formData: FormData) {
 
   const id = String(formData.get("id") ?? "").trim();
   const name = normalizeGroupName(String(formData.get("name") ?? ""));
-  const backgroundColor = normalizeGroupColor(String(formData.get("backgroundColor") ?? ""));
 
   if (!id || !name) redirect(withMessage("/admin", "error", messages.groupDataInvalid));
 
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from("link_groups").update({ name, background_color: backgroundColor }).eq("id", id);
+  const { error } = await supabase.from("link_groups").update({ name }).eq("id", id);
 
   if (error) {
     const message = error.code === "23505" ? messages.groupExists : error.message;
@@ -123,6 +121,40 @@ export async function updateGroupAction(formData: FormData) {
 
   revalidatePath("/admin");
   redirect(withMessage("/admin", "ok", messages.groupRenamed));
+}
+
+
+export async function updateGroupColorAction(formData: FormData) {
+  await requireAdminAction();
+  const language = await getLanguage();
+  const messages = translations[language].actions;
+
+  const id = String(formData.get("id") ?? "").trim();
+  const backgroundColor = normalizeGroupColor(String(formData.get("backgroundColor") ?? ""));
+
+  if (!id) redirect(withMessage("/admin", "error", messages.groupNotFound));
+
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase
+    .from("link_groups")
+    .update({ background_color: backgroundColor })
+    .eq("id", id);
+
+  if (error) {
+    const needsMigration =
+      error.code === "PGRST204" ||
+      error.code === "42703" ||
+      error.message?.includes("background_color");
+
+    redirect(withMessage(
+      "/admin",
+      "error",
+      needsMigration ? messages.groupColorMigrationRequired : error.message
+    ));
+  }
+
+  revalidatePath("/admin");
+  redirect(withMessage("/admin", "ok", messages.groupColorUpdated));
 }
 
 export async function deleteGroupAction(formData: FormData) {

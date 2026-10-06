@@ -1173,3 +1173,261 @@ select option {
     justify-items: start;
   }
 }
+
+
+/* v0.4.2 — clean group manager and in-group color controls */
+.group-create-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: end;
+  margin-bottom: 22px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel-soft);
+}
+
+.group-create-field {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+
+.group-create-input,
+.group-manager-name-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: #ffffff;
+  padding: 0 14px;
+  color: var(--text);
+  outline: none;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .035);
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+.group-create-input:focus,
+.group-manager-name-input:focus {
+  border-color: #7f95b0;
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, .07);
+}
+
+.group-manager-list {
+  display: grid;
+  gap: 12px;
+}
+
+.group-manager-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 17px;
+  background: #ffffff;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, .04);
+}
+
+.group-manager-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.group-manager-color {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, .12);
+}
+
+.group-rename-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: min(650px, 100%);
+}
+
+.group-rename-field {
+  min-width: 0;
+}
+
+.group-manager-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.group-manager-meta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.link-group-heading {
+  min-height: 72px;
+  padding: 0 20px;
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+.link-group-heading::before {
+  margin-right: 2px;
+}
+
+.link-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.link-group-count {
+  padding: 7px 12px;
+  border: 1px solid rgba(15, 23, 42, .06);
+  border-radius: 999px;
+  background: rgba(255,255,255,.68);
+  color: #334966;
+}
+
+.link-group-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 18px 14px;
+  border-top: 1px solid rgba(15, 23, 42, .08);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.link-group-controls > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.link-group-controls strong {
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.link-group-controls > div:first-child span {
+  color: #52677f;
+  font-size: 11px;
+}
+
+.link-group-color-form {
+  flex: 0 0 auto;
+}
+
+.group-color-picker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.group-color-option {
+  display: inline-grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.group-color-swatch {
+  display: block;
+  width: 25px;
+  height: 25px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, .14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+
+.group-color-option:hover .group-color-swatch {
+  transform: scale(1.08);
+}
+
+.group-color-option-selected .group-color-swatch {
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px rgba(15, 23, 42, .28);
+}
+
+.link-group-empty {
+  margin: 16px;
+  padding: 20px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--muted);
+  text-align: center;
+}
+
+.demo-color-picker .group-color-option {
+  cursor: default;
+}
+
+@media (max-width: 780px) {
+  .group-create-form {
+    grid-template-columns: 1fr;
+  }
+
+  .group-create-form .button {
+    width: 100%;
+  }
+
+  .group-manager-row,
+  .group-manager-identity,
+  .group-manager-actions,
+  .link-group-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .group-rename-form {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .group-manager-color {
+    display: none;
+  }
+
+  .group-manager-actions {
+    width: 100%;
+  }
+
+  .group-manager-actions form,
+  .group-manager-actions .button {
+    width: 100%;
+  }
+
+  .link-group-controls {
+    gap: 12px;
+  }
+}

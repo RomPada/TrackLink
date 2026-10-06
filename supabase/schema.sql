@@ -1,6 +1,6 @@
 -- TrackLink database schema for Supabase/Postgres
 -- Safe to run again when upgrading an existing TrackLink database.
--- Current schema target: TrackLink v0.4.1
+-- Current schema target: TrackLink v0.4.2
 
 create extension if not exists pgcrypto;
 
@@ -184,3 +184,6 @@ revoke all on public.link_stats from anon, authenticated;
 revoke all on public.overall_stats from anon, authenticated;
 revoke all on public.daily_stats from anon, authenticated;
 revoke all on public.click_records from anon, authenticated;
+
+-- Ask Supabase PostgREST to refresh its schema cache after DDL changes.
+NOTIFY pgrst, 'reload schema';

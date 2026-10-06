@@ -4,7 +4,7 @@ import PeriodStatsGrid, { type PeriodKey, type PeriodStats } from "@/components/
 import { APP_NAME, APP_VERSION } from "@/lib/app-meta";
 import { linksCountLabel, localeFor, translations, type Language } from "@/lib/i18n";
 import { getLanguage } from "@/lib/language";
-import { DEFAULT_GROUP_COLOR } from "@/lib/group-colors";
+import { DEFAULT_GROUP_COLOR, GROUP_COLOR_OPTIONS } from "@/lib/group-colors";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -277,6 +277,16 @@ export default async function DemoPage({ searchParams }: { searchParams: SearchP
             return (
               <details className="link-group" key={group.name} open>
                 <summary className="link-group-heading" style={{ backgroundColor: group.color }}><span><span className="group-color-dot" style={{ backgroundColor: group.color }} aria-hidden="true" />{group.name}</span><span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span></summary>
+                <div className="link-group-controls" style={{ backgroundColor: group.color }}>
+                  <div><strong>{text.groups.backgroundColor}</strong><span>{text.groups.colorHint}</span></div>
+                  <div className="group-color-picker demo-color-picker" aria-hidden="true">
+                    {GROUP_COLOR_OPTIONS.map((option) => (
+                      <span className={`group-color-option${group.color === option.value ? " group-color-option-selected" : ""}`} key={option.value}>
+                        <span className="group-color-swatch" style={{ backgroundColor: option.value }} />
+                      </span>
+                    ))}
+                  </div>
+                </div>
                 <div className="link-list">
                   {groupLinks.map((link) => {
                     const demoUrl = `https://go.brand.link/${link.slug}`;

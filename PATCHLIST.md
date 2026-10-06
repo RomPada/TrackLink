@@ -6,6 +6,38 @@ This file is maintained for every release in English and Ukrainian.
 ---
 
 
+## v0.4.2 — Group color placement and Supabase migration fix
+
+### English
+
+- Moved the pastel group-color selector into each group inside `Your links`.
+- Group color changes now have a dedicated server action and no longer affect normal group creation/renaming.
+- Simplified and realigned the group manager: clean name field, color indicator, link count, rename, and delete controls.
+- Removed the nested border-on-border look from group name inputs.
+- Empty groups are now also displayed in `Your links`, so their color can be configured before links are assigned.
+- Added a dedicated `supabase/migrations/v0.4.2_group_colors.sql` migration.
+- Added `NOTIFY pgrst, 'reload schema'` so Supabase/PostgREST refreshes the API schema cache after the migration.
+- Added a clear migration-specific message if `background_color` is missing.
+- Updated the public demo to show the group color selector in the same location.
+
+### Українська
+
+- Вибір пастельного кольору перенесено безпосередньо в кожну групу в секції `Твої посилання`.
+- Зміна кольору групи тепер має окрему server action і не впливає на звичайне створення чи перейменування груп.
+- Перероблено та вирівняно блок керування групами: чисте поле назви, індикатор кольору, кількість посилань, перейменування та видалення.
+- Прибрано некрасивий ефект вкладених рамок у полі назви групи.
+- Порожні групи тепер теж відображаються в `Твої посилання`, тому колір можна налаштувати ще до додавання посилань.
+- Додано окрему міграцію `supabase/migrations/v0.4.2_group_colors.sql`.
+- Додано `NOTIFY pgrst, 'reload schema'`, щоб Supabase/PostgREST одразу оновлював API schema cache після міграції.
+- Якщо `background_color` відсутній, TrackLink тепер показує зрозуміле повідомлення саме про потрібну міграцію.
+- Демо оновлено так, щоб вибір кольору був показаний у тому самому місці.
+
+**Commit:** `fix: move group colors into sections and repair migration`  
+**Release tag:** `v0.4.2`
+
+---
+
+
 ## v0.4.1 — Group styling polish and pastel color coding
 
 ### English

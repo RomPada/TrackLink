@@ -1,6 +1,6 @@
 # TrackLink
 
-Version: **v0.4.1**
+Version: **v0.4.2**
 
 
 TrackLink is a small self-hosted redirect and click analytics app for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.
@@ -43,7 +43,9 @@ All links can redirect to the same destination while keeping separate statistics
 
 ## Important upgrade step
 
-Version `v0.4.1` adds group background colors, so rerun the latest schema file once after updating. If you are upgrading from a version earlier than `v0.3.0`, note that `v0.3.0` also extends the database schema with link groups. If you are upgrading from a version earlier than `v0.3.0`, note that `v0.3.0` extends the database schema with link groups. If you upgrade from any earlier version, run the latest schema file again.
+If you see `Could not find the background_color column ... in the schema cache`, run `supabase/migrations/v0.4.2_group_colors.sql` in Supabase SQL Editor. The migration also asks PostgREST to refresh its schema cache.
+
+Version `v0.4.2` requires the group-color migration once. You can either run the full current `supabase/schema.sql` or only `supabase/migrations/v0.4.2_group_colors.sql`. Both are safe for an existing TrackLink database.
 
 After updating the code, open **Supabase -> SQL Editor** and run the current file:
 

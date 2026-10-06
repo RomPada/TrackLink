@@ -13,6 +13,7 @@ import {
   logoutAction,
   toggleLinkAction,
   updateGroupAction,
+  updateGroupColorAction,
   updateLinkAction,
 } from "@/app/actions";
 import { isAdmin } from "@/lib/auth";
@@ -480,70 +481,74 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         </div>
       </section>
 
-      <section className="panel">
-        <div className="panel-heading"><div><h2>{text.groups.title}</h2><p className="muted">{text.groups.description}</p></div></div>
-        <form action={createGroupAction} className="group-create-form">
-          <label className="group-field">
-            <span className="group-field-label">{text.groups.newGroup}</span>
-            <div className="group-name-wrap">
-              <span className="group-color-dot" style={{ backgroundColor: DEFAULT_GROUP_COLOR }} aria-hidden="true" />
-              <input className="group-name-input" name="name" placeholder={text.groups.placeholder} required maxLength={80} />
-            </div>
-          </label>
-          <label className="group-field">
-            <span className="group-field-label">{text.groups.backgroundColor}</span>
-            <GroupColorPicker name="backgroundColor" selectedColor={DEFAULT_GROUP_COLOR} language={language} idPrefix="create-group-color" />
-          </label>
-          <button className="button button-primary" type="submit">{text.groups.create}</button>
-        </form>
 
-        {groups.length > 0 ? (
-          <div className="group-manager-list">
-            {groups.map((group) => {
-              const groupColor = normalizeGroupColor(group.background_color);
-              return (
-                <div className="group-manager-row" key={group.id}>
-                  <form action={updateGroupAction} className="group-rename-form">
-                    <input type="hidden" name="id" value={group.id} />
-                    <div className="group-edit-main">
-                      <label className="group-field">
-                        <span className="group-field-label">{text.groups.newGroup}</span>
-                        <div className="group-name-wrap">
-                          <span className="group-color-dot" style={{ backgroundColor: groupColor }} aria-hidden="true" />
-                          <input className="group-name-input" name="name" defaultValue={group.name} required maxLength={80} />
-                        </div>
-                      </label>
-                      <label className="group-field">
-                        <span className="group-field-label">{text.groups.backgroundColor}</span>
-                        <GroupColorPicker
-                          name="backgroundColor"
-                          selectedColor={groupColor}
-                          language={language}
-                          idPrefix={`group-${group.id}-color`}
-                        />
-                      </label>
-                    </div>
-                    <div className="group-manager-side">
-                      <div className="group-manager-meta">{linksCountLabel(linksByGroup.get(group.id)?.length ?? 0, language)}</div>
-                      <button className="button button-ghost button-small" type="submit">{text.common.save}</button>
-                    </div>
-                  </form>
-                  <form action={deleteGroupAction} className="group-delete-form">
-                    <input type="hidden" name="id" value={group.id} />
-                    <ConfirmSubmitButton
-                      label={text.common.delete}
-                      title={text.groups.confirmTitle}
-                      message={text.groups.confirmBody}
-                      cancelLabel={text.common.cancel}
-                      confirmLabel={text.common.delete}
-                    />
-                  </form>
-                </div>
-              );
-            })}
+<section className="panel">
+  <div className="panel-heading">
+    <div>
+      <h2>{text.groups.title}</h2>
+      <p className="muted">{text.groups.description}</p>
+    </div>
+  </div>
+
+  <form action={createGroupAction} className="group-create-form">
+    <label className="group-create-field">
+      <span className="group-field-label">{text.groups.newGroup}</span>
+      <input
+        className="group-create-input"
+        name="name"
+        placeholder={text.groups.placeholder}
+        required
+        maxLength={80}
+      />
+    </label>
+    <button className="button button-primary" type="submit">{text.groups.create}</button>
+  </form>
+
+  {groups.length > 0 ? (
+    <div className="group-manager-list">
+      {groups.map((group) => {
+        const groupColor = normalizeGroupColor(group.background_color);
+        return (
+          <div className="group-manager-row" key={group.id}>
+            <div className="group-manager-identity">
+              <span className="group-manager-color" style={{ backgroundColor: groupColor }} aria-hidden="true" />
+              <form action={updateGroupAction} className="group-rename-form">
+                <input type="hidden" name="id" value={group.id} />
+                <label className="group-rename-field">
+                  <span className="sr-only">{text.groups.groupName}</span>
+                  <input
+                    className="group-manager-name-input"
+                    name="name"
+                    defaultValue={group.name}
+                    required
+                    maxLength={80}
+                  />
+                </label>
+                <button className="button button-ghost button-small" type="submit">{text.common.rename}</button>
+              </form>
+            </div>
+
+            <div className="group-manager-actions">
+              <span className="group-manager-meta">{linksCountLabel(linksByGroup.get(group.id)?.length ?? 0, language)}</span>
+              <form action={deleteGroupAction}>
+                <input type="hidden" name="id" value={group.id} />
+                <ConfirmSubmitButton
+                  label={text.common.delete}
+                  title={text.groups.confirmTitle}
+                  message={text.groups.confirmBody}
+                  cancelLabel={text.common.cancel}
+                  confirmLabel={text.common.delete}
+                />
+              </form>
+            </div>
           </div>
-        ) : <div className="empty-state group-empty">{text.groups.noGroups}</div>}
-      </section>
+        );
+      })}
+    </div>
+  ) : (
+    <div className="empty-state group-empty">{text.groups.noGroups}</div>
+  )}
+</section>
 
       <section className="panel">
         <div className="panel-heading"><div><h2>{text.createLink.title}</h2><p className="muted">{text.createLink.description}</p></div></div>
@@ -565,11 +570,33 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           <div className="link-groups-list">
             {groups.map((group) => {
               const groupLinks = linksByGroup.get(group.id) ?? [];
-              if (groupLinks.length === 0) return null;
+              const groupColor = normalizeGroupColor(group.background_color);
               return (
                 <details className="link-group" key={group.id} open>
-                  <summary className="link-group-heading" style={{ backgroundColor: normalizeGroupColor(group.background_color) }}><span><span className="group-color-dot" style={{ backgroundColor: normalizeGroupColor(group.background_color) }} aria-hidden="true" />{group.name}</span><span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span></summary>
-                  <div className="link-list">{groupLinks.map(renderLinkCard)}</div>
+                  <summary className="link-group-heading" style={{ backgroundColor: groupColor }}>
+                    <span className="link-group-title">
+                      <span className="group-color-dot" style={{ backgroundColor: groupColor }} aria-hidden="true" />
+                      {group.name}
+                    </span>
+                    <span className="link-group-count">{linksCountLabel(groupLinks.length, language)}</span>
+                  </summary>
+
+                  <div className="link-group-controls" style={{ backgroundColor: groupColor }}>
+                    <div>
+                      <strong>{text.groups.backgroundColor}</strong>
+                      <span>{text.groups.colorHint}</span>
+                    </div>
+                    <form action={updateGroupColorAction} className="link-group-color-form">
+                      <input type="hidden" name="id" value={group.id} />
+                      <GroupColorPicker selectedColor={groupColor} language={language} />
+                    </form>
+                  </div>
+
+                  {groupLinks.length > 0 ? (
+                    <div className="link-list">{groupLinks.map(renderLinkCard)}</div>
+                  ) : (
+                    <div className="link-group-empty">{text.yourLinks.empty}</div>
+                  )}
                 </details>
               );
             })}
