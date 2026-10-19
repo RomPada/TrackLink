@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import type { Language } from "@/lib/i18n";
 import { normalizeGroupColor } from "@/lib/group-colors";
@@ -49,7 +49,7 @@ export default function GroupSelect({ name, groups, defaultValue = "", language,
       const target = event.target as Node;
       if (!triggerRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
     };
-    const onKey = (event: KeyboardEvent) => {
+    const onKey = (event: globalThis.KeyboardEvent) => {
       if (event.key === "Escape") {
         setOpen(false);
         triggerRef.current?.focus();
@@ -73,7 +73,7 @@ export default function GroupSelect({ name, groups, defaultValue = "", language,
     triggerRef.current?.focus();
   }
 
-  function onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+  function onKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       const index = options.findIndex((option) => option.id === selected);

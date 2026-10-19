@@ -1,6 +1,8 @@
 # TrackLink
 
-Version: **v0.5.0**
+Version: **v0.5.1**
+
+> **v0.5.1:** Fixes the `GroupSelect.tsx` keyboard event type mismatch (`TS2769`) that prevented deployment to Vercel. No additional database migration is needed beyond v0.5.0.
 
 
 TrackLink is a small self-hosted redirect and click analytics app for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.

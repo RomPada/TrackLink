@@ -5,6 +5,27 @@ This file is maintained for every release in English and Ukrainian.
 
 ---
 
+## v0.5.1 — Fix TypeScript keyboard event types in group selector
+
+### English
+
+- Fixed `TS2769` in `components/GroupSelect.tsx` that blocked Vercel production builds.
+- Separated React keyboard event types used by the group selector button from native DOM keyboard events used by `document.addEventListener` / `removeEventListener`.
+- Kept keyboard navigation, Escape handling, group selection, and the existing UI unchanged.
+- No database migration is required; the v0.5.0 SQL migration is still required if not previously applied.
+
+### Українська
+
+- Виправлено `TS2769` у `components/GroupSelect.tsx`, через яку не проходила production-збірка у Vercel.
+- Розділено типи клавіатурних подій React для кнопки вибору групи та нативні типи DOM для `document.addEventListener` / `removeEventListener`.
+- Клавіатурна навігація, обробка Escape, вибір групи та інтерфейс залишилися без змін.
+- Нова міграція бази не потрібна; якщо міграцію v0.5.0 ще не виконано, її потрібно застосувати.
+
+**Commit:** `fix: correct keyboard event types in group selector`  
+**Release tag:** `v0.5.1`
+
+---
+
 ## v0.5.0 — Short-link sharing, group picker and custom ordering
 
 ### English
