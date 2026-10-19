@@ -1,6 +1,6 @@
 # TrackLink
 
-Version: **v0.4.3**
+Version: **v0.5.0**
 
 
 TrackLink is a small self-hosted redirect and click analytics app for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.
@@ -25,6 +25,10 @@ All links can redirect to the same destination while keeping separate statistics
 - public `/demo` page with static sample data and no Supabase/admin access;
 - link groups for organizing destinations or campaigns such as Patreon, GitHub, and YouTube;
 - pastel background color presets for every group;
+- drag-and-drop sorting of links within groups, with up/down controls;
+- custom group dropdown with color indicators and keyboard support;
+- copy-tracking-link buttons, including immediately after creating a new link;
+- custom SVG/PNG/ICO favicon;
 - short redirect route `/[slug]` instead of `/go/[slug]`;
 - backward compatibility for old `/go/[slug]` links;
 - aggregated statistics for today, the last 7 days, the current month, and all time;
@@ -41,24 +45,33 @@ All links can redirect to the same destination while keeping separate statistics
 - no IP address storage;
 - `referrer` is no longer stored.
 
-## Important upgrade step
+## Upgrade to v0.5.0 — required one-time migration
 
-`v0.4.3` itself does not add another database migration. If you have already run the `v0.4.2` group-color migration, no database change is required for this release.
-
-
-If you see `Could not find the background_color column ... in the schema cache`, run `supabase/migrations/v0.4.3_group_colors.sql` in Supabase SQL Editor. The migration also asks PostgREST to refresh its schema cache.
-
-Version `v0.4.3` requires the group-color migration once. You can either run the full current `supabase/schema.sql` or only `supabase/migrations/v0.4.3_group_colors.sql`. Both are safe for an existing TrackLink database.
-
-After updating the code, open **Supabase -> SQL Editor** and run the current file:
+**Before using the new ordering feature**, open **Supabase → SQL Editor** and run:
 
 ```text
-supabase/schema.sql
+supabase/migrations/v0.5.0_link_order.sql
 ```
 
-The script is designed to upgrade an existing TrackLink database. It keeps the v0.2.0 analytics/country changes, adds the `link_groups` table plus `group_id` on tracking links, and adds `background_color` for colored group sections. Existing links remain valid and are placed in `No group` until you assign them.
+You can also run the complete updated `supabase/schema.sql` instead. The migration adds `links.sort_order`, fills the order for existing links, updates `link_stats`, and installs the `reorder_links_in_group` database function. It preserves your existing groups, links, URLs, and click history. Refresh the admin page after the SQL editor reports success. Do not run the old v0.4.3 schema after applying the migration.
 
-Existing click records remain in the database. Old records will not have country information because it was not collected before v0.2.0.
+### Reordering links
+
+In **Your links**, drag the grip at the left of a link card to another position **inside the same group**. The changed order saves to Supabase. Use the ↑/↓ buttons for touchscreens or keyboard operation. Moving a link to a different group is still done through that link's **Settings → Group** menu.
+
+### Sharing a tracking URL
+
+Each link has a **Copy tracking link** button. After creating a link, TrackLink also shows the new full URL with a prominent copy button. It is the short URL (e.g. `https://your-domain.com/tg`) you should paste on Telegram, Instagram, Patreon, etc., not the destination URL.
+
+### Favicon
+
+The browser tab icon is provided by `app/icon.svg`, `app/icon.png`, and `app/favicon.ico`.
+
+## Older database upgrades
+
+If you have not previously installed the v0.4.2+ group-color migrations, prefer running the **entire** updated `supabase/schema.sql` rather than only the v0.5.0 migration. The complete script updates all features through v0.5.0 and keeps existing link and click data.
+
+If you see `Could not find the background_color column ... in the schema cache`, the full schema can also fix that and refresh PostgREST's schema cache. Earlier click records may have an unknown country because it was not collected before v0.2.0.
 
 ## 1. Create a Supabase project
 

@@ -1,6 +1,6 @@
 -- TrackLink database schema for Supabase/Postgres
 -- Safe to run again when upgrading an existing TrackLink database.
--- Current schema target: TrackLink v0.4.2
+-- Current schema target: TrackLink v0.5.0
 
 create extension if not exists pgcrypto;
 
@@ -18,6 +18,7 @@ create table if not exists public.links (
   slug text not null unique,
   destination_url text not null,
   group_id uuid references public.link_groups(id) on delete set null,
+  sort_order integer not null default 0,
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
   constraint links_slug_format check (slug ~ '^[a-z0-9][a-z0-9_-]{0,79}$'),
@@ -36,6 +37,15 @@ create table if not exists public.clicks (
 -- Upgrade existing installations.
 alter table public.links
   add column if not exists group_id uuid references public.link_groups(id) on delete set null;
+alter table public.links add column if not exists sort_order integer;
+with ranked as (
+  select id, (row_number() over (partition by group_id order by created_at desc, id desc) - 1)::integer as position
+  from public.links
+)
+update public.links as l set sort_order = ranked.position
+from ranked where l.id = ranked.id and l.sort_order is null;
+alter table public.links alter column sort_order set default 0;
+alter table public.links alter column sort_order set not null;
 alter table public.link_groups add column if not exists background_color text;
 update public.link_groups set background_color = '#e8eef7' where background_color is null or btrim(background_color) = '';
 alter table public.link_groups alter column background_color set default '#e8eef7';
@@ -44,6 +54,7 @@ alter table public.clicks add column if not exists country_code text;
 alter table public.clicks drop column if exists referrer;
 
 create index if not exists links_group_id_idx on public.links(group_id);
+create index if not exists links_group_sort_order_idx on public.links(group_id, sort_order, created_at desc);
 create index if not exists clicks_link_id_idx on public.clicks(link_id);
 create index if not exists clicks_clicked_at_idx on public.clicks(clicked_at desc);
 create index if not exists clicks_visitor_id_idx on public.clicks(visitor_id);
@@ -99,11 +110,12 @@ select
       date_trunc('month', now() at time zone 'Europe/Kyiv')
   )::bigint as month_unique,
   l.group_id,
-  g.name as group_name
+  g.name as group_name,
+  l.sort_order
 from public.links l
 left join public.link_groups g on g.id = l.group_id
 left join public.clicks c on c.link_id = l.id
-group by l.id, l.name, l.slug, l.destination_url, l.is_active, l.created_at, l.group_id, g.name;
+group by l.id, l.name, l.slug, l.destination_url, l.is_active, l.created_at, l.group_id, g.name, l.sort_order;
 
 -- Existing first four columns are kept for backward compatibility.
 create or replace view public.overall_stats
@@ -169,6 +181,54 @@ select
 from public.clicks c
 join public.links l on l.id = c.link_id
 left join public.link_groups g on g.id = l.group_id;
+
+create or replace function public.reorder_links_in_group(p_group_id uuid, p_link_ids uuid[])
+returns void
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  group_size integer;
+  provided_size integer;
+begin
+  provided_size := coalesce(cardinality(p_link_ids), 0);
+  if provided_size < 2 or provided_size > 2000 then
+    raise exception 'Invalid link list size';
+  end if;
+
+  select count(*) into group_size
+  from public.links
+  where group_id is not distinct from p_group_id;
+
+  if group_size <> provided_size then
+    raise exception 'The group link list has changed; refresh the page';
+  end if;
+
+  if (select count(distinct id) from unnest(p_link_ids) as ids(id)) <> provided_size then
+    raise exception 'Duplicate link IDs are not allowed';
+  end if;
+
+  if exists (
+    select 1
+    from unnest(p_link_ids) as ids(id)
+    left join public.links as links on links.id = ids.id
+    where links.id is null
+       or links.group_id is distinct from p_group_id
+  ) then
+    raise exception 'One or more links do not belong to this group';
+  end if;
+
+  update public.links as l
+  set sort_order = ordered.position::integer - 1
+  from unnest(p_link_ids) with ordinality as ordered(id, position)
+  where l.id = ordered.id;
+end;
+$$;
+
+revoke all on function public.reorder_links_in_group(uuid, uuid[]) from public, anon, authenticated;
+grant execute on function public.reorder_links_in_group(uuid, uuid[]) to service_role;
+
 
 grant usage on schema public to service_role;
 grant all on table public.link_groups to service_role;

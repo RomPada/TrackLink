@@ -199,12 +199,23 @@ export async function createLinkAction(formData: FormData) {
   }
 
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from("links").insert({
+  // New links appear first in their group without changing existing order.
+  let firstLinkQuery = supabase.from("links").select("sort_order");
+  firstLinkQuery = groupId ? firstLinkQuery.eq("group_id", groupId) : firstLinkQuery.is("group_id", null);
+  const { data: firstLink, error: positionError } = await firstLinkQuery
+    .order("sort_order", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (positionError) redirect(withMessage("/admin", "error", positionError.message));
+  const sortOrder = Number(firstLink?.sort_order ?? 1) - 1;
+
+  const { data: createdLink, error } = await supabase.from("links").insert({
     name,
     slug,
     destination_url: destinationUrl,
     group_id: groupId,
-  });
+    sort_order: sortOrder,
+  }).select("id").single();
 
   if (error) {
     const message = error.code === "23505" ? messages.slugExists : error.message;
@@ -212,7 +223,7 @@ export async function createLinkAction(formData: FormData) {
   }
 
   revalidatePath("/admin");
-  redirect(withMessage("/admin", "ok", messages.linkCreated));
+  redirect(`/admin?created=${encodeURIComponent(createdLink.id)}`);
 }
 
 export async function updateLinkAction(formData: FormData) {
@@ -235,10 +246,30 @@ export async function updateLinkAction(formData: FormData) {
   }
 
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase
-    .from("links")
-    .update({ name, slug, destination_url: destinationUrl, group_id: groupId })
-    .eq("id", id);
+  const { data: original, error: lookupError } = await supabase
+    .from("links").select("group_id").eq("id", id).maybeSingle();
+  if (lookupError || !original) {
+    redirect(withMessage("/admin", "error", lookupError?.message ?? messages.linkDataInvalid));
+  }
+
+  const changes: {
+    name: string;
+    slug: string;
+    destination_url: string;
+    group_id: string | null;
+    sort_order?: number;
+  } = { name, slug, destination_url: destinationUrl, group_id: groupId };
+  if (original.group_id !== groupId) {
+    let targetQuery = supabase.from("links").select("sort_order");
+    targetQuery = groupId ? targetQuery.eq("group_id", groupId) : targetQuery.is("group_id", null);
+    const { data: first, error: orderError } = await targetQuery
+      .order("sort_order", { ascending: true }).limit(1).maybeSingle();
+    if (orderError) redirect(withMessage("/admin", "error", orderError.message));
+    changes.sort_order = Number(first?.sort_order ?? 1) - 1;
+  }
+
+  const { error } = await supabase.from("links")
+    .update(changes).eq("id", id);
 
   if (error) {
     const message = error.code === "23505" ? messages.slugExists : error.message;
@@ -279,4 +310,32 @@ export async function deleteLinkAction(formData: FormData) {
 
   revalidatePath("/admin");
   redirect(withMessage("/admin", "ok", messages.linkDeleted));
+}
+
+
+export async function reorderLinksAction(groupId: string | null, linkIds: string[]) {
+  if (!(await isAdmin())) return { ok: false, error: "Authentication required" };
+  if (!Array.isArray(linkIds) || linkIds.length < 2 || linkIds.length > 2000) {
+    return { ok: false, error: "Invalid link order" };
+  }
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (linkIds.some((id) => !uuidPattern.test(id)) || new Set(linkIds).size !== linkIds.length) {
+    return { ok: false, error: "Invalid link IDs" };
+  }
+  if (groupId !== null && !uuidPattern.test(groupId)) {
+    return { ok: false, error: "Invalid group" };
+  }
+
+  try {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.rpc("reorder_links_in_group", {
+      p_group_id: groupId,
+      p_link_ids: linkIds,
+    });
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/admin");
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Could not reorder links" };
+  }
 }

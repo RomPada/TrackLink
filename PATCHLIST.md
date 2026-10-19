@@ -5,6 +5,33 @@ This file is maintained for every release in English and Ukrainian.
 
 ---
 
+## v0.5.0 — Short-link sharing, group picker and custom ordering
+
+### English
+
+- Added a custom TrackLink favicon in SVG, PNG and ICO formats.
+- Replaced native group selects in admin forms with a styled dropdown, pastel group indicators and keyboard controls.
+- Made the copy-tracking-link buttons explicit; the newly created URL is immediately ready to copy.
+- Added drag-and-drop sorting of links *within* each group, plus accessible up/down controls.
+- Saved group-specific ordering in Supabase with a transactional RPC and strict validation.
+- Added `sort_order` to the database, filled initial ordering for existing links, and extended the `link_stats` view.
+- Added the one-time database migration `supabase/migrations/v0.5.0_link_order.sql`.
+
+### Українська
+
+- Додано власний фавікон TrackLink у форматах SVG, PNG та ICO.
+- Стандартні списки вибору груп замінено на стилізоване меню з пастельними маркерами та клавіатурним керуванням.
+- Зроблено помітнішою кнопку копіювання трекінгового URL; після створення нове посилання можна одразу скопіювати.
+- Додано перетягування посилань *у межах своєї групи*, а також кнопки переміщення вгору/вниз.
+- Порядок кожної групи зберігається в Supabase через транзакційну RPC-функцію з перевіркою даних.
+- Додано `sort_order`, початкове сортування наявних посилань та поле у view `link_stats`.
+- Додано одноразову SQL-міграцію `supabase/migrations/v0.5.0_link_order.sql`.
+
+**Commit:** `feat: add sortable links and group picker`  
+**Release tag:** `v0.5.0`
+
+---
+
 
 ## v0.4.3 — Group background and in-place color updates
 

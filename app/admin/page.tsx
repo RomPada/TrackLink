@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
 import CopyButton from "@/components/CopyButton";
 import GroupColorPicker from "@/components/GroupColorPicker";
+import GroupSelect from "@/components/GroupSelect";
+import SortableLinks from "@/components/SortableLinks";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PeriodStatsGrid, { type PeriodKey, type PeriodStats } from "@/components/PeriodStatsGrid";
 import {
@@ -49,6 +51,7 @@ type LinkStat = {
   month_unique: number | string;
   group_id: string | null;
   group_name: string | null;
+  sort_order: number | null;
 };
 type DailyStat = { day: string; clicks: number | string };
 type ClickRecord = {
@@ -183,6 +186,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   const errorMessage = typeof params.error === "string" ? params.error : "";
   const selectedPeriod = parsePeriod(params.period);
   const requestedLinkId = typeof params.link === "string" ? params.link : null;
+  const recentlyCreatedId = typeof params.created === "string" ? params.created : null;
 
   const todayKey = kyivDateKey();
   const todayLabel = displayDateKey(todayKey, language);
@@ -210,7 +214,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
     const supabase = getSupabaseAdmin();
     const [groupsResult, linksResult, overallResult, dailyResult] = await Promise.all([
       supabase.from("link_groups").select("*").order("name", { ascending: true }),
-      supabase.from("link_stats").select("*").order("created_at", { ascending: false }),
+      supabase.from("link_stats").select("*")
+        .order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
       supabase.from("overall_stats").select("*").maybeSingle(),
       supabase.from("daily_stats").select("*").order("day", { ascending: true }).limit(14),
     ]);
@@ -266,6 +271,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
   }
 
   const selectedLink = requestedLinkId ? links.find((link) => link.id === requestedLinkId) ?? null : null;
+  const recentlyCreatedLink = recentlyCreatedId ? links.find((link) => link.id === recentlyCreatedId) ?? null : null;
   const maxDaily = Math.max(1, ...daily.map((item) => Number(item.clicks)));
   const overallStats = toPeriodStats(overall);
   const latestClickAt = links.reduce<string | null>((latest, link) => {
@@ -306,7 +312,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           </div>
 
           <div className="inline-actions">
-            <CopyButton value={trackingUrl} language={language} />
+            <CopyButton value={trackingUrl} language={language} prominent />
             <a className="button button-ghost button-small" href={`${trackingUrl}?test=1`} target="_blank" rel="noreferrer">
               {text.common.check}
             </a>
@@ -334,13 +340,16 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             <input type="hidden" name="id" value={link.id} />
             <label>{text.createLink.name}<input name="name" defaultValue={link.name} required /></label>
             <label>{text.createLink.slug}<input name="slug" defaultValue={link.slug} pattern="[A-Za-z0-9_-]+" required /></label>
-            <label>
-              {text.createLink.group}
-              <select name="groupId" className="pretty-select" defaultValue={link.group_id ?? ""}>
-                <option value="">{text.common.noGroup}</option>
-                {groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
-              </select>
-            </label>
+            <div className="group-field-label-wrap">
+              <span className="group-field-label">{text.createLink.group}</span>
+              <GroupSelect
+                name="groupId"
+                groups={groups}
+                defaultValue={link.group_id}
+                language={language}
+                noGroupLabel={text.common.noGroup}
+              />
+            </div>
             <label className="wide">
               {text.createLink.destination}
               <input name="destinationUrl" type="url" defaultValue={link.destination_url} required />
@@ -392,6 +401,15 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
 
       {ok ? <div className="alert alert-success">{ok}</div> : null}
       {errorMessage ? <div className="alert alert-error">{errorMessage}</div> : null}
+      {recentlyCreatedLink && (
+        <section className="created-link-panel" aria-live="polite">
+          <div>
+            <strong>{language === "uk" ? "Посилання створено — можна копіювати" : "Link created — ready to share"}</strong>
+            <div className="created-link-url">{`${baseUrl}/${recentlyCreatedLink.slug}`}</div>
+          </div>
+          <CopyButton value={`${baseUrl}/${recentlyCreatedLink.slug}`} language={language} prominent />
+        </section>
+      )}
 
       {databaseError ? (
         <section className="database-error">
@@ -555,10 +573,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
         <form action={createLinkAction} className="form-grid">
           <label>{text.createLink.name}<input name="name" placeholder="Telegram" required /></label>
           <label>{text.createLink.slug}<input name="slug" placeholder="tg" pattern="[A-Za-z0-9_-]+" required /></label>
-          <label>
-            {text.createLink.group}
-            <select name="groupId" className="pretty-select" defaultValue=""><option value="">{text.common.noGroup}</option>{groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select>
-          </label>
+          <div className="group-field-label-wrap">
+            <span className="group-field-label">{text.createLink.group}</span>
+            <GroupSelect name="groupId" groups={groups} language={language} noGroupLabel={text.common.noGroup} />
+          </div>
           <label className="wide">{text.createLink.destination}<input name="destinationUrl" type="url" placeholder="https://patreon.com/yourname" required /></label>
           <div className="wide form-actions"><button className="button button-primary" type="submit">{text.createLink.create}</button></div>
         </form>
@@ -593,7 +611,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                   </div>
 
                   {groupLinks.length > 0 ? (
-                    <div className="link-list">{groupLinks.map(renderLinkCard)}</div>
+                    <SortableLinks groupId={group.id} items={groupLinks.map((link) => ({ id: link.id, content: renderLinkCard(link) }))} language={language} />
                   ) : (
                     <div className="link-group-empty">{text.yourLinks.empty}</div>
                   )}
@@ -603,7 +621,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
             {(linksByGroup.get(null)?.length ?? 0) > 0 ? (
               <details className="link-group link-group-ungrouped" open>
                 <summary className="link-group-heading"><span><span className="group-color-dot" style={{ backgroundColor: DEFAULT_GROUP_COLOR }} aria-hidden="true" />{text.common.noGroup}</span><span className="link-group-count">{linksCountLabel(linksByGroup.get(null)?.length ?? 0, language)}</span></summary>
-                <div className="link-list">{(linksByGroup.get(null) ?? []).map(renderLinkCard)}</div>
+                <SortableLinks groupId={null} items={(linksByGroup.get(null) ?? []).map((link) => ({ id: link.id, content: renderLinkCard(link) }))} language={language} />
               </details>
             ) : null}
           </div>
