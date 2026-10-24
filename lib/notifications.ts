@@ -91,5 +91,5 @@ export async function notifyRecordedClick(args: {
   if (milestoneReached) title = `TrackLink · ${total.toLocaleString("en-US")} clicks!`;
   else if (isNew && preferences.new_visitor) title = "TrackLink · New unique visitor";
   const description = `${country} · ${link.name} → ${groupName} · ${Number(link.today_clicks ?? 0).toLocaleString("en-US")} clicks today`;
-  await pushToAll({ title, body: description, tag: milestoneReached ? `milestone-${link.id}-${total}` : undefined });
+  await pushToAll({ title, body: description, tag: milestoneReached ? `milestone-${args.linkId}-${total}` : undefined });
 }

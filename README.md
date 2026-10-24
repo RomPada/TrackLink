@@ -1,8 +1,8 @@
 # TrackLink
 
-Version: **v0.7.0**
+Version: **v0.7.1**
 
-> **v0.6.0:** English-only interface, international demo records, per-record click deletion with confirmation, and newest-first 14-day charts. No additional database migration is required.
+> **v0.7.1:** Fixed the TypeScript errors in the notifications and Web Push modules that blocked Vercel production builds. The v0.7.0 database migration and environment variables remain unchanged.
 
 
 TrackLink is a small self-hosted redirect and click analytics app for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.

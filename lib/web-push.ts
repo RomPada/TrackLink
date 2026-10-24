@@ -68,7 +68,7 @@ function createVapidToken(endpoint: string, config: ReturnType<typeof getConfig>
   const audience = url.origin;
   const ecdh = createECDH("prime256v1");
   ecdh.setPrivateKey(decode(config.privateKey));
-  const pub = ecdh.getPublicKey(undefined, "uncompressed");
+  const pub = ecdh.getPublicKey();
   if (b64(pub) !== config.publicKey) throw new Error("VAPID public/private keys do not match.");
 
   const privateKey = createPrivateKey({
@@ -90,7 +90,7 @@ export function encryptPayload(keys: PushKeys, payload: string) {
     throw new Error("Invalid browser push encryption keys.");
   }
   const serverKeys = createECDH("prime256v1");
-  const senderPublic = serverKeys.generateKeys(undefined, "uncompressed");
+  const senderPublic = serverKeys.generateKeys();
   const sharedSecret = serverKeys.computeSecret(recipientPublic);
   const prkKey = hkdfExtract(authenticationSecret, sharedSecret);
   const ikm = hkdfExpand(prkKey, Buffer.concat([info("WebPush: info"), recipientPublic, senderPublic]), 32);

@@ -4,6 +4,18 @@ Release history is maintained in English.
 
 ---
 
+## v0.7.1 — Fix Vercel TypeScript build errors
+
+- Fixed `TS2339` in `lib/notifications.ts`: milestone notification tags now use the known `args.linkId` instead of referencing an `id` field omitted from the `link_stats` query.
+- Fixed `TS2345` in `lib/web-push.ts`: ECDH public keys are generated/retrieved using correctly typed Node.js crypto APIs without passing `undefined` as an encoding.
+- Preserved Web Push/PWA functionality, notification preferences, Supabase schema, and VAPID settings.
+- No database migration or new environment variables are required for upgrading from v0.7.0.
+
+**Commit:** `fix: resolve Web Push TypeScript build errors`  
+**Release tag:** `v0.7.1`
+
+---
+
 ## v0.7.0 — Android PWA and Web Push notifications
 
 - Added installable PWA manifest and Android-friendly app icons.
