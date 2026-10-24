@@ -1,13 +1,12 @@
 # TrackLink
 
-Version: **v0.5.1**
+Version: **v0.6.0**
 
-> **v0.5.1:** Fixes the `GroupSelect.tsx` keyboard event type mismatch (`TS2769`) that prevented deployment to Vercel. No additional database migration is needed beyond v0.5.0.
+> **v0.6.0:** English-only interface, international demo records, per-record click deletion with confirmation, and newest-first 14-day charts. No additional database migration is required.
 
 
 TrackLink is a small self-hosted redirect and click analytics app for Telegram, Facebook, Instagram, ads, email campaigns, Patreon links, and other traffic sources.
 
-Ukrainian documentation: [README.ua.md](./README.ua.md)  
 Release history: [PATCHLIST.md](./PATCHLIST.md)  
 Development roadmap: [ROADMAP.md](./ROADMAP.md)
 
@@ -22,7 +21,7 @@ All links can redirect to the same destination while keeping separate statistics
 ## Features
 
 - unlimited tracking links;
-- English is the default UI language with an EN / UA switcher on login, admin, and demo pages;
+- English-only interface for login, admin, and demo;
 - deletion confirmation dialogs for links and groups;
 - public `/demo` page with static sample data and no Supabase/admin access;
 - link groups for organizing destinations or campaigns such as Patreon, GitHub, and YouTube;
@@ -232,3 +231,13 @@ Restart `npm run dev` after changing `.env.local`.
 ### Hydration mismatch in development
 
 If the warning contains foreign attributes such as `bis_skin_checked`, `bis_register`, or `__processed_...`, a browser extension is modifying the HTML before React hydrates it. Test in an incognito window or temporarily disable the extension for `localhost`.
+
+## v0.6.0 updates
+
+- English-only UI; the EN/UA language switcher and Ukrainian translation bundle were removed.
+- Demo uses sample visitors from a range of countries other than Ukraine. The demo never accesses the database.
+- In **Click details**, each real record now has a **Delete** button and confirmation dialog. Deleting a click is permanent and immediately changes summary statistics.
+- The demo table also supports deletion, but only in browser memory; refreshing restores its sample rows.
+- The 14-day chart starts with **Today**, then **Yesterday**, followed by older dates; days without clicks show zero.
+
+There is no SQL migration for this version. Previous migrations (including v0.5.0 link ordering) still apply to older installations.

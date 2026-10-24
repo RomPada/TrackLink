@@ -21,8 +21,8 @@ export default function CopyButton({ value, language = "en", prominent = false }
   }
 
   const caption = status === "copied" ? text.copied : status === "error"
-    ? (language === "uk" ? "Не вдалося скопіювати" : "Copy failed")
-    : (language === "uk" ? "Копіювати посилання" : "Copy tracking link");
+    ? "Copy failed"
+    : "Copy tracking link";
 
   return (
     <button

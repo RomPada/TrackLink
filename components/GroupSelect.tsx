@@ -95,7 +95,7 @@ export default function GroupSelect({ name, groups, defaultValue = "", language,
         ref={triggerRef}
         type="button"
         className="group-select-trigger"
-        aria-label={language === "uk" ? "Вибрати групу" : "Choose a group"}
+        aria-label={"Choose a group"}
         role="combobox"
         aria-haspopup="listbox"
         aria-controls={open ? listId : undefined}
@@ -114,7 +114,7 @@ export default function GroupSelect({ name, groups, defaultValue = "", language,
           ref={menuRef}
           id={listId}
           role="listbox"
-          aria-label={language === "uk" ? "Групи посилань" : "Link groups"}
+          aria-label={"Link groups"}
           className="group-select-menu"
           style={{ left: position.left, top: position.top, width: position.width, maxHeight: position.maxHeight }}
         >

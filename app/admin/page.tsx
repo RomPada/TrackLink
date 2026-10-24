@@ -5,12 +5,12 @@ import CopyButton from "@/components/CopyButton";
 import GroupColorPicker from "@/components/GroupColorPicker";
 import GroupSelect from "@/components/GroupSelect";
 import SortableLinks from "@/components/SortableLinks";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PeriodStatsGrid, { type PeriodKey, type PeriodStats } from "@/components/PeriodStatsGrid";
 import {
   createGroupAction,
   createLinkAction,
   deleteGroupAction,
+  deleteClickRecordAction,
   deleteLinkAction,
   logoutAction,
   toggleLinkAction,
@@ -217,7 +217,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       supabase.from("link_stats").select("*")
         .order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
       supabase.from("overall_stats").select("*").maybeSingle(),
-      supabase.from("daily_stats").select("*").order("day", { ascending: true }).limit(14),
+      supabase.from("daily_stats").select("*").order("day", { ascending: false }).limit(14),
     ]);
 
     const firstError = groupsResult.error ?? linksResult.error ?? overallResult.error ?? dailyResult.error;
@@ -272,7 +272,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
 
   const selectedLink = requestedLinkId ? links.find((link) => link.id === requestedLinkId) ?? null : null;
   const recentlyCreatedLink = recentlyCreatedId ? links.find((link) => link.id === recentlyCreatedId) ?? null : null;
-  const maxDaily = Math.max(1, ...daily.map((item) => Number(item.clicks)));
+  // Keep exactly 14 calendar days, starting with today on the left.
+  const dailyLookup = new Map(daily.map((entry) => [entry.day, Number(entry.clicks)]));
+  const chartDays = Array.from({ length: 14 }, (_, index) => {
+    const day = shiftDateKey(todayKey, -index);
+    return { day, clicks: dailyLookup.get(day) ?? 0 };
+  });
+  const maxDaily = Math.max(1, ...chartDays.map((item) => item.clicks));
   const overallStats = toPeriodStats(overall);
   const latestClickAt = links.reduce<string | null>((latest, link) => {
     if (!link.last_click_at) return latest;
@@ -392,7 +398,6 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           <p className="muted version-note">{APP_VERSION}</p>
         </div>
         <div className="topbar-actions">
-          <LanguageSwitcher language={language} />
           <form action={logoutAction}>
             <button className="button button-ghost" type="submit">{text.common.logout}</button>
           </form>
@@ -404,7 +409,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       {recentlyCreatedLink && (
         <section className="created-link-panel" aria-live="polite">
           <div>
-            <strong>{language === "uk" ? "Посилання створено — можна копіювати" : "Link created — ready to share"}</strong>
+            <strong>{"Link created — ready to share"}</strong>
             <div className="created-link-url">{`${baseUrl}/${recentlyCreatedLink.slug}`}</div>
           </div>
           <CopyButton value={`${baseUrl}/${recentlyCreatedLink.slug}`} language={language} prominent />
@@ -464,7 +469,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           {records.length === 0 ? <div className="empty-state">{text.dashboard.noPeriodClicks}</div> : (
             <div className="records-table-wrap">
               <table className="records-table">
-                <thead><tr><th>{text.dashboard.when}</th><th>{text.dashboard.visitor}</th><th>{text.dashboard.country}</th><th>{text.dashboard.group}</th><th>{text.dashboard.sourceLink}</th><th>{text.dashboard.clickedTo}</th></tr></thead>
+                <thead><tr><th>{text.dashboard.when}</th><th>{text.dashboard.visitor}</th><th>{text.dashboard.country}</th><th>{text.dashboard.group}</th><th>{text.dashboard.sourceLink}</th><th>{text.dashboard.clickedTo}</th><th>{text.dashboard.actions}</th></tr></thead>
                 <tbody>
                   {records.map((record) => (
                     <tr key={record.id}>
@@ -474,6 +479,20 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
                       <td>{record.group_name ?? text.common.noGroup}</td>
                       <td><strong>{record.link_name}</strong><span className="record-secondary">/{record.slug}</span></td>
                       <td className="record-destination"><a href={record.destination_url} target="_blank" rel="noreferrer">{record.destination_url}</a></td>
+                      <td className="record-actions-cell">
+                        <form action={deleteClickRecordAction}>
+                          <input type="hidden" name="recordId" value={String(record.id)} />
+                          <input type="hidden" name="period" value={selectedPeriod} />
+                          {selectedLink ? <input type="hidden" name="link" value={selectedLink.id} /> : null}
+                          <ConfirmSubmitButton
+                            label={text.common.delete}
+                            title={text.dashboard.deleteRecordTitle}
+                            message={text.dashboard.deleteRecordBody}
+                            cancelLabel={text.common.cancel}
+                            confirmLabel={text.common.delete}
+                          />
+                        </form>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -486,13 +505,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
       <section className="panel">
         <div className="panel-heading"><div><h2>{text.dashboard.last14}</h2><p className="muted">{text.dashboard.last14Description}</p></div></div>
         <div className="bars">
-          {daily.length === 0 ? <p className="muted">{text.dashboard.noClicksYet}</p> : daily.map((item) => {
+          {chartDays.map((item, index) => {
             const clicks = Number(item.clicks);
             const height = Math.max(8, Math.round((clicks / maxDaily) * 120));
             return (
               <div className="bar-item" key={item.day} title={`${item.day}: ${clicks}`}>
                 <span className="bar-value">{clicks}</span><div className="bar" style={{ height }} />
-                <span className="bar-label">{new Intl.DateTimeFormat(localeFor(language), { day: "2-digit", month: "2-digit" }).format(new Date(`${item.day}T12:00:00Z`))}</span>
+                <span className="bar-label">{index === 0 ? "Today" : index === 1 ? "Yesterday" : new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${item.day}T12:00:00Z`))}</span>
               </div>
             );
           })}

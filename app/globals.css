@@ -1531,3 +1531,18 @@ select option {
 .group-field-label-wrap .group-field-label { font-size: 14px; font-weight: 700; padding-left: 0; }
 
 .copy-tracking-button { white-space: nowrap; }
+
+/* v0.6.0: individual click record actions */
+.record-actions-cell {
+  min-width: 102px;
+  white-space: nowrap;
+  text-align: right;
+}
+.record-actions-cell .button {
+  min-height: 34px;
+}
+
+/* v0.6.0: login no longer reserves space for a language switcher */
+.auth-card {
+  padding-top: 30px;
+}

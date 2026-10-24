@@ -26,7 +26,6 @@ export default function SortableLinks({ groupId, items, language }: Props) {
   const [error, setError] = useState("");
   const dragRef = useRef<string | null>(null);
   const itemSignature = items.map((item) => item.id).join("|");
-  const isUk = language === "uk";
 
   useEffect(() => {
     setOrder(items.map((item) => item.id));
@@ -45,7 +44,7 @@ export default function SortableLinks({ groupId, items, language }: Props) {
       if (!response.ok) throw new Error(response.error || "Could not save order");
     } catch (reason) {
       setOrder(previous);
-      setError(reason instanceof Error ? reason.message : (isUk ? "Не вдалося зберегти порядок" : "Could not save order"));
+      setError(reason instanceof Error ? reason.message : "Could not save order");
     } finally {
       setSaving(false);
     }
@@ -87,8 +86,8 @@ export default function SortableLinks({ groupId, items, language }: Props) {
               className="sortable-drag-handle"
               draggable={!saving}
               disabled={saving}
-              title={isUk ? "Перетягни для зміни порядку" : "Drag to reorder"}
-              aria-label={isUk ? "Перетягни для зміни порядку" : "Drag to reorder"}
+              title={"Drag to reorder"}
+              aria-label={"Drag to reorder"}
               onDragStart={(event) => {
                 dragRef.current = id;
                 setDragging(id);
@@ -106,14 +105,14 @@ export default function SortableLinks({ groupId, items, language }: Props) {
               </svg>
             </button>
             <div className="sortable-step-buttons">
-              <button type="button" disabled={saving || index === 0} aria-label={isUk ? "Перемістити вище" : "Move up"} title={isUk ? "Перемістити вище" : "Move up"} onClick={() => void shift(id, -1)}>↑</button>
-              <button type="button" disabled={saving || index === order.length - 1} aria-label={isUk ? "Перемістити нижче" : "Move down"} title={isUk ? "Перемістити нижче" : "Move down"} onClick={() => void shift(id, 1)}>↓</button>
+              <button type="button" disabled={saving || index === 0} aria-label={"Move up"} title={"Move up"} onClick={() => void shift(id, -1)}>↑</button>
+              <button type="button" disabled={saving || index === order.length - 1} aria-label={"Move down"} title={"Move down"} onClick={() => void shift(id, 1)}>↓</button>
             </div>
           </div>
           <div className="sortable-link-content">{byId.get(id)}</div>
         </div>
       ))}
-      {saving && <div className="sortable-note" role="status">{isUk ? "Зберігаємо порядок..." : "Saving order..."}</div>}
+      {saving && <div className="sortable-note" role="status">{"Saving order..."}</div>}
       {error && <div className="sortable-error" role="alert">{error}</div>}
     </div>
   );

@@ -12,7 +12,7 @@ export default function GroupColorPicker({ selectedColor, language }: Props) {
   return (
     <div className="group-color-picker" role="group">
       {GROUP_COLOR_OPTIONS.map((option) => {
-        const label = language === "uk" ? option.labelUk : option.labelEn;
+        const label = option.labelEn;
         const selected = current === option.value;
         return (
           <button

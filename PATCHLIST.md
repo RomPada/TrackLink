@@ -1,25 +1,30 @@
-# TrackLink — Patch List / Список змін
+# TrackLink — Patch List
 
-This file is maintained for every release in English and Ukrainian.  
-Цей файл оновлюється для кожної версії англійською та українською мовами.
+Release history is maintained in English.
+
+---
+
+## v0.6.0 — English-only UI and click record controls
+
+- Removed Ukrainian UI translations and language switcher; TrackLink now displays English only.
+- Replaced Ukraine-related country examples in demo with sample international locations.
+- Added confirmed deletion for individual click records in the protected admin dashboard.
+- Added a demo-only delete control that changes local sample rows without contacting Supabase.
+- Reversed the 14-day charts so Today is the first bar, then Yesterday, then older days.
+- Included zero-activity days in the real chart.
+- No database migration is needed for this release.
+
+**Commit:** `feat: add click record deletion and simplify English UI`  
+**Release tag:** `v0.6.0`
 
 ---
 
 ## v0.5.1 — Fix TypeScript keyboard event types in group selector
 
-### English
-
 - Fixed `TS2769` in `components/GroupSelect.tsx` that blocked Vercel production builds.
 - Separated React keyboard event types used by the group selector button from native DOM keyboard events used by `document.addEventListener` / `removeEventListener`.
 - Kept keyboard navigation, Escape handling, group selection, and the existing UI unchanged.
 - No database migration is required; the v0.5.0 SQL migration is still required if not previously applied.
-
-### Українська
-
-- Виправлено `TS2769` у `components/GroupSelect.tsx`, через яку не проходила production-збірка у Vercel.
-- Розділено типи клавіатурних подій React для кнопки вибору групи та нативні типи DOM для `document.addEventListener` / `removeEventListener`.
-- Клавіатурна навігація, обробка Escape, вибір групи та інтерфейс залишилися без змін.
-- Нова міграція бази не потрібна; якщо міграцію v0.5.0 ще не виконано, її потрібно застосувати.
 
 **Commit:** `fix: correct keyboard event types in group selector`  
 **Release tag:** `v0.5.1`
@@ -27,8 +32,6 @@ This file is maintained for every release in English and Ukrainian.
 ---
 
 ## v0.5.0 — Short-link sharing, group picker and custom ordering
-
-### English
 
 - Added a custom TrackLink favicon in SVG, PNG and ICO formats.
 - Replaced native group selects in admin forms with a styled dropdown, pastel group indicators and keyboard controls.
@@ -38,16 +41,6 @@ This file is maintained for every release in English and Ukrainian.
 - Added `sort_order` to the database, filled initial ordering for existing links, and extended the `link_stats` view.
 - Added the one-time database migration `supabase/migrations/v0.5.0_link_order.sql`.
 
-### Українська
-
-- Додано власний фавікон TrackLink у форматах SVG, PNG та ICO.
-- Стандартні списки вибору груп замінено на стилізоване меню з пастельними маркерами та клавіатурним керуванням.
-- Зроблено помітнішою кнопку копіювання трекінгового URL; після створення нове посилання можна одразу скопіювати.
-- Додано перетягування посилань *у межах своєї групи*, а також кнопки переміщення вгору/вниз.
-- Порядок кожної групи зберігається в Supabase через транзакційну RPC-функцію з перевіркою даних.
-- Додано `sort_order`, початкове сортування наявних посилань та поле у view `link_stats`.
-- Додано одноразову SQL-міграцію `supabase/migrations/v0.5.0_link_order.sql`.
-
 **Commit:** `feat: add sortable links and group picker`  
 **Release tag:** `v0.5.0`
 
@@ -56,23 +49,12 @@ This file is maintained for every release in English and Ukrainian.
 
 ## v0.4.3 — Group background and in-place color updates
 
-### English
-
 - Removed the success banner after changing a group color.
 - Group color changes now update in place without redirecting the admin page to the top.
 - Applied the selected pastel color to the full group container, not only its header and color controls.
 - Kept individual link cards light for readability while showing the group color around them.
 - Updated the demo page to reflect the same full-group background behavior.
 - No new database migration is required if the v0.4.2 group-color migration has already been applied.
-
-### Українська
-
-- Прибрано зелене повідомлення після зміни кольору групи.
-- Зміна кольору тепер оновлюється на місці без перекидання адмінки на початок сторінки.
-- Обраний пастельний колір застосовується до всього контейнера групи, а не лише до заголовка та панелі вибору кольору.
-- Самі картки посилань залишено світлими для читабельності, але фон навколо них показує колір відповідної групи.
-- Демо-сторінку оновлено за тією самою логікою повного фону групи.
-- Нова міграція бази не потрібна, якщо міграцію кольорів із v0.4.2 уже виконано.
 
 **Commit:** `fix: preserve scroll and apply color to full group`  
 **Release tag:** `v0.4.3`
@@ -81,8 +63,6 @@ This file is maintained for every release in English and Ukrainian.
 
 
 ## v0.4.2 — Group color placement and Supabase migration fix
-
-### English
 
 - Moved the pastel group-color selector into each group inside `Your links`.
 - Group color changes now have a dedicated server action and no longer affect normal group creation/renaming.
@@ -94,18 +74,6 @@ This file is maintained for every release in English and Ukrainian.
 - Added a clear migration-specific message if `background_color` is missing.
 - Updated the public demo to show the group color selector in the same location.
 
-### Українська
-
-- Вибір пастельного кольору перенесено безпосередньо в кожну групу в секції `Твої посилання`.
-- Зміна кольору групи тепер має окрему server action і не впливає на звичайне створення чи перейменування груп.
-- Перероблено та вирівняно блок керування групами: чисте поле назви, індикатор кольору, кількість посилань, перейменування та видалення.
-- Прибрано некрасивий ефект вкладених рамок у полі назви групи.
-- Порожні групи тепер теж відображаються в `Твої посилання`, тому колір можна налаштувати ще до додавання посилань.
-- Додано окрему міграцію `supabase/migrations/v0.4.2_group_colors.sql`.
-- Додано `NOTIFY pgrst, 'reload schema'`, щоб Supabase/PostgREST одразу оновлював API schema cache після міграції.
-- Якщо `background_color` відсутній, TrackLink тепер показує зрозуміле повідомлення саме про потрібну міграцію.
-- Демо оновлено так, щоб вибір кольору був показаний у тому самому місці.
-
 **Commit:** `fix: move group colors into sections and repair migration`  
 **Release tag:** `v0.4.2`
 
@@ -113,8 +81,6 @@ This file is maintained for every release in English and Ukrainian.
 
 
 ## v0.4.1 — Group styling polish and pastel color coding
-
-### English
 
 - Refined the group-name field styling and spacing in the group manager.
 - Restyled group selectors and dropdown fields to look cleaner and more consistent.
@@ -124,24 +90,12 @@ This file is maintained for every release in English and Ukrainian.
 - Updated the demo page to reflect group color styling.
 - Added the `background_color` field to the Supabase schema upgrade script.
 
-### Українська
-
-- Покращено вигляд рамки та відступів у полі назви групи.
-- Оновлено стилі випадаючих списків, щоб вони виглядали акуратніше й сучасніше.
-- Додано пастельні приглушені кольори фону для груп посилань.
-- Додано вибір кольору під час створення та редагування групи.
-- Обраний колір тепер застосовується до секцій груп у списку посилань і до бейджів груп.
-- Оновлено демо-сторінку, щоб вона теж показувала кольорові групи.
-- Оновлено `supabase/schema.sql`: додано поле `background_color`.
-
 **Commit:** `feat: add group color themes and polish group inputs`  
 **Release tag:** `v0.4.1`
 
 ---
 
 ## v0.4.0 — Bilingual UI and safer destructive actions
-
-### English
 
 - Added site-wide EN / UA language switching on login, admin, and demo pages.
 - English is now the default interface language.
@@ -154,27 +108,12 @@ This file is maintained for every release in English and Ukrainian.
 - Added `ROADMAP.md` with the planned TrackLink development directions.
 - No database schema migration is required for this release.
 
-### Українська
-
-- Додано перемикання мов EN / UA на сторінці входу, в адмінці та демо.
-- Англійська мова тепер використовується за замовчуванням.
-- Обрана мова зберігається в cookie.
-- Текст кнопки `Відкрити демо` вирівняно по центру.
-- Стан іконки ока тепер відповідає стану пароля: закритий пароль — закрите око, видимий пароль — відкрите око.
-- Покращено відступи та оформлення поля `Нова група`.
-- Додано вікна підтвердження перед видаленням посилань і груп.
-- Локалізовано повідомлення адмінських дій, періоди статистики, деталізацію переходів, демо та елементи керування.
-- Додано `ROADMAP.md` із зафіксованим планом подальшого розвитку TrackLink.
-- Міграція бази даних для цього релізу не потрібна.
-
 **Commit:** `feat: add bilingual UI and delete confirmations`  
 **Release tag:** `v0.4.0`
 
 ---
 
 ## v0.3.0 — Public demo and link groups
-
-### English
 
 - Added a public `/demo` page accessible from the login screen.
 - Demo mode uses only static sample data and does not connect to Supabase or grant admin permissions.
@@ -188,28 +127,12 @@ This file is maintained for every release in English and Ukrainian.
 - Reserved the `/demo` slug so it cannot be used as a tracking link.
 - Updated the application and database schema version to `v0.3.0`.
 
-### Українська
-
-- На сторінку входу додано кнопку для відкриття публічного `/demo`.
-- Демо працює тільки на статичних тестових даних, не підключається до Supabase і не надає адмінських прав.
-- У демо додано приклади статистики за періодами, деталізації переходів, груп посилань і read-only форми створення посилання.
-- Додано постійні групи посилань через нову таблицю Supabase `link_groups`.
-- При створенні та редагуванні посилання можна вибрати групу.
-- В адмінці можна створювати, перейменовувати та видаляти групи.
-- Видалення групи не видаляє посилання — вони переходять у `Без групи`.
-- Секцію `Твої посилання` розбито на згортані групи за ресурсом/кампанією.
-- Назву групи додано до деталізації переходів.
-- Slug `/demo` зарезервовано системою.
-- Версію застосунку та схеми бази оновлено до `v0.3.0`.
-
 **Commit:** `feat: add public demo and link groups`  
 **Release tag:** `v0.3.0`
 
 ---
 
 ## v0.2.0 — Period analytics, click details and short URLs
-
-### English
 
 - Added the `System / Database` status section.
 - Rebuilt top-level analytics into four periods: today, last 7 days, current month, and all time.
@@ -225,30 +148,12 @@ This file is maintained for every release in English and Ukrainian.
 - Added reserved root slugs to avoid collisions with TrackLink system routes.
 - Updated the application version to `v0.2.0`.
 
-### Українська
-
-- Додано блок стану `System / Database`.
-- Верхню статистику перероблено на чотири періоди: сьогодні, останні 7 днів, поточний місяць і весь час.
-- У кожному блоці додано показники `Унікальні` та `Всього переходів`.
-- Блоки періодів зроблено клікабельними; після натискання відкриваються відповідні записи переходів.
-- Таку саму статистику за чотири періоди додано для кожного окремого посилання.
-- Згенеровані URL змінено з `/go/[slug]` на короткі кореневі URL на кшталт `/tg`.
-- Старі `/go/[slug]` залишено робочими для сумісності з уже опублікованими посиланнями.
-- Агреговані розрахунки перенесено у Supabase/PostgreSQL views.
-- До запису переходу додано код країни через геолокаційні headers Vercel.
-- Поле `referrer` видалено із записів переходів і схеми бази даних.
-- У деталях переходів показуються анонімний ID відвідувача, час, країна, посилання-джерело, кінцева адреса та тип пристрою.
-- Додано зарезервовані slug для захисту системних маршрутів TrackLink.
-- Версію застосунку оновлено до `v0.2.0`.
-
 **Commit:** `feat: add period analytics and short tracking URLs`  
 **Release tag:** `v0.2.0`
 
 ---
 
 ## v0.1.4 — Documentation structure update
-
-### English
 
 - Made `README.md` the primary English README for GitHub.
 - Kept the Ukrainian documentation in `README.ua.md`.
@@ -257,23 +162,12 @@ This file is maintained for every release in English and Ukrainian.
 - Added direct links between the main README, Ukrainian README, and patch list.
 - Updated the application version to `v0.1.4`.
 
-### Українська
-
-- `README.md` зроблено основним англомовним README для GitHub.
-- Українську документацію залишено в `README.ua.md`.
-- Видалено дублюючий файл `README.en.md`.
-- Окремі англійський та український changelog об'єднано в один двомовний `PATCHLIST.md`.
-- Додано прямі посилання між основним README, українським README та патчлістом.
-- Версію застосунку оновлено до `v0.1.4`.
-
 **Commit:** `docs: simplify documentation structure`  
 **Release tag:** `v0.1.4`
 
 ---
 
 ## v0.1.3 — Admin diagnostics fix and password visibility
-
-### English
 
 - Added a show/hide password button on the login page.
 - Supabase errors are no longer thrown into the UI as raw JavaScript objects.
@@ -282,15 +176,6 @@ This file is maintained for every release in English and Ukrainian.
 - Documented browser-extension hydration mismatch troubleshooting.
 - Updated the application version to `v0.1.3`.
 
-### Українська
-
-- Додано кнопку показу/приховування пароля на сторінці входу.
-- Supabase-помилки більше не виводяться в інтерфейс як сирий JavaScript-об'єкт.
-- Додано зрозумілий діагностичний блок при проблемах з базою.
-- Додано перевірку, щоб `sb_publishable_...` не використовувався як `SUPABASE_SECRET_KEY`.
-- Додано інструкцію щодо hydration mismatch, який можуть спричиняти розширення браузера.
-- Версію застосунку оновлено до `v0.1.3`.
-
 **Commit:** `fix: improve admin diagnostics and password visibility`  
 **Release tag:** `v0.1.3`
 
@@ -298,21 +183,11 @@ This file is maintained for every release in English and Ukrainian.
 
 ## v0.1.2 — TrackLink rename
 
-### English
-
 - Renamed the project from `Transition Tracker` to `TrackLink`.
 - Updated the app title and metadata.
 - Updated the package name to `tracklink`.
 - Updated internal admin cookie/session identifiers.
 - Updated English and Ukrainian documentation for the new project name.
-
-### Українська
-
-- Проєкт перейменовано з `Transition Tracker` на `TrackLink`.
-- Оновлено назву в інтерфейсі та metadata.
-- Package name змінено на `tracklink`.
-- Оновлено внутрішні ідентифікатори admin cookie/session.
-- Англійську та українську документацію оновлено під нову назву.
 
 **Commit:** `chore: rename project to TrackLink`  
 **Release tag:** `v0.1.2`
@@ -320,8 +195,6 @@ This file is maintained for every release in English and Ukrainian.
 ---
 
 ## v0.1.1 — UI contrast and documentation update
-
-### English
 
 - Simplified the login screen.
 - Made the project name the main login title.
@@ -331,24 +204,12 @@ This file is maintained for every release in English and Ukrainian.
 - Added English and Ukrainian README files.
 - Added English and Ukrainian changelogs.
 
-### Українська
-
-- Спрощено сторінку входу.
-- Назву проєкту зроблено головним заголовком на екрані входу.
-- Покращено контрастність робочого середовища.
-- Блоки посилань зроблено більш виразними.
-- Додано відображення версії додатку.
-- Додано README англійською та українською.
-- Додано патчлісти англійською та українською.
-
 **Commit:** `style: improve admin UI contrast`  
 **Release tag:** `v0.1.1`
 
 ---
 
 ## v0.1.0 — Initial MVP release
-
-### English
 
 - Created redirect tracking through `/go/[slug]`.
 - Added a password-protected admin area.
@@ -357,16 +218,6 @@ This file is maintained for every release in English and Ukrainian.
 - Added a 14-day chart.
 - Added preview-bot filtering.
 - Added the Supabase schema and deployment-ready project structure.
-
-### Українська
-
-- Створено трекер переходів через `/go/[slug]`.
-- Додано захищену паролем адмінку.
-- Додано створення, редагування, видалення, увімкнення та вимкнення посилань.
-- Додано загальні переходи, унікальних відвідувачів, статистику за 24 години та 7 днів.
-- Додано графік за 14 днів.
-- Додано фільтрацію preview-ботів.
-- Додано схему Supabase та структуру проєкту для деплою.
 
 **Commit:** `feat: create initial link tracking MVP`  
 **Release tag:** `v0.1.0`

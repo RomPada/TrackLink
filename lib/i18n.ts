@@ -1,5 +1,4 @@
-export type Language = "en" | "uk";
-export const LANGUAGE_COOKIE = "tracklink_language";
+export type Language = "en";
 
 export const translations = {
   en: {
@@ -58,6 +57,10 @@ export const translations = {
       group: "Group",
       sourceLink: "Link",
       clickedTo: "Destination",
+      actions: "Actions",
+      deleteRecordTitle: "Delete click record?",
+      deleteRecordBody: "This click will be permanently deleted and statistics will be recalculated. This cannot be undone.",
+      deleteRecordError: "Could not delete the selected click record.",
       last14: "Last 14 days",
       last14Description: "Aggregated number of counted clicks by day.",
       noClicksYet: "No clicks yet.",
@@ -152,175 +155,15 @@ export const translations = {
       linkDataInvalid: "Check the link data",
       linkUpdated: "Link updated",
       linkDeleted: "Link deleted",
+      clickDeleted: "Click record deleted",
     },
-  },
-  uk: {
-    login: {
-      password: "Пароль",
-      signIn: "Увійти",
-      openDemo: "Відкрити демо",
-      wrongPassword: "Неправильний пароль",
-    },
-    common: {
-      logout: "Вийти",
-      close: "Закрити",
-      save: "Зберегти",
-      delete: "Видалити",
-      rename: "Перейменувати",
-      cancel: "Скасувати",
-      confirm: "Підтвердити",
-      copy: "Копіювати",
-      copied: "Скопійовано",
-      check: "Перевірити",
-      settings: "Налаштування",
-      active: "Активне",
-      paused: "Вимкнене",
-      enable: "Увімкнути",
-      disable: "Вимкнути",
-      noGroup: "Без групи",
-      links: "посилань",
-      link: "посилання",
-      destination: "Куди веде:",
-      lastClick: "Останній перехід:",
-    },
-    dashboard: {
-      title: "Переходи за посиланнями",
-      systemDescription: "Стан застосунку та бази даних без відображення секретних ключів.",
-      system: "System",
-      online: "Online",
-      version: "Версія",
-      environment: "Середовище",
-      shortUrl: "Короткий URL",
-      database: "Database",
-      connected: "Connected",
-      service: "Сервіс",
-      groups: "Груп",
-      links: "Посилань",
-      clickRecords: "Записів переходів",
-      lastRecord: "Останній запис",
-      detailsEyebrow: "Деталі переходів",
-      allLinks: "усі посилання",
-      privacy: "Відвідувач визначається анонімним cookie ID. IP-адреса не зберігається.",
-      found: "Знайдено:",
-      shown100: "показано 100 останніх записів",
-      noPeriodClicks: "За вибраний період переходів немає.",
-      when: "Коли",
-      visitor: "Відвідувач",
-      country: "Країна",
-      group: "Група",
-      sourceLink: "Посилання",
-      clickedTo: "Куди перейшов",
-      last14: "Останні 14 днів",
-      last14Description: "Агрегована кількість зарахованих переходів по днях.",
-      noClicksYet: "Поки що переходів немає.",
-      databaseErrorTitle: "Не вдалося завантажити дані Supabase",
-      databaseErrorHelp: "Перевір SUPABASE_URL і SUPABASE_SECRET_KEY у .env.local. Також виконай актуальний supabase/schema.sql у Supabase SQL Editor після оновлення TrackLink.",
-      unknownDatabaseError: "Supabase повернув невідому помилку.",
-      recordsError: "Не вдалося завантажити записи переходів.",
-      connectionError: "Не вдалося підключитися до Supabase.",
-      schemaOutdated: "Схема Supabase застаріла. Виконай актуальний supabase/schema.sql для TrackLink.",
-    },
-    period: {
-      today: "Сьогодні",
-      week: "За останні 7 днів",
-      month: "За місяць",
-      all: "Всього",
-      unique: "Унікальні",
-      totalClicks: "Всього переходів",
-    },
-    device: {
-      unknown: "Невідомий пристрій",
-      tablet: "Планшет",
-      mobile: "Мобільний",
-      computer: "Компʼютер",
-      unknownCountry: "Невідомо / локально",
-    },
-    groups: {
-      title: "Групи посилань",
-      description: "Обʼєднуй посилання за сервісами, кампаніями або напрямами.",
-      newGroup: "Нова група",
-      placeholder: "Наприклад: Patreon",
-      create: "Створити групу",
-      backgroundColor: "Колір групи",
-      colorHint: "Обери пастельний колір для цієї групи",
-      groupName: "Назва групи",
-      noGroups: "Груп ще немає. Створи першу, наприклад Patreon.",
-      confirmTitle: "Видалити групу?",
-      confirmBody: "Групу буде видалено, але її посилання збережуться та перейдуть у «Без групи».",
-    },
-    createLink: {
-      title: "Створити нове посилання",
-      description: "Наприклад: Telegram → /tg → твій Patreon.",
-      name: "Назва",
-      slug: "Slug",
-      group: "Група",
-      destination: "Кінцева адреса",
-      create: "Створити посилання",
-    },
-    yourLinks: {
-      title: "Твої посилання",
-      description: "Посилання згруповані за призначенням. Превʼю-боти та browser prefetch не зараховуються.",
-      empty: "Створи перше посилання вище.",
-      confirmTitle: "Видалити посилання?",
-      confirmBody: "Посилання та історію його переходів буде видалено назавжди. Цю дію неможливо скасувати.",
-    },
-    demo: {
-      title: "Демонстрація TrackLink",
-      backToLogin: "До входу",
-      noticeTitle: "Демо-режим.",
-      notice: "Усі дані на цій сторінці тестові. Сторінка не підключається до Supabase, не записує переходи й не надає адміністративних прав.",
-      systemDescription: "Приклад того, як виглядає системний блок у робочій версії.",
-      mode: "Режим",
-      publicDemo: "Public demo",
-      notConnected: "Not connected",
-      source: "Джерело",
-      staticData: "Static demo data",
-      realRecords: "Реальні записи",
-      detailsEyebrow: "Демо · Деталі переходів",
-      detailsNote: "Це приклад тестових записів, а не реальні користувачі.",
-      last14Description: "Демонстраційний приклад агрегованої статистики.",
-      formDescription: "У демо форма показана лише для ознайомлення і нічого не зберігає.",
-      yourLinksTitle: "Твої посилання · Demo",
-      yourLinksDescription: "Приклад групування посилань за кінцевим ресурсом.",
-      createDisabled: "Створити посилання",
-      lastClickMinutes: (minutes: number) => `${minutes} хв тому`,
-      daysAgo: (days: number) => `-${days}д`,
-    },
-    actions: {
-      groupNameRequired: "Введи назву групи",
-      groupExists: "Група з такою назвою вже існує",
-      groupCreated: "Групу створено",
-      groupDataInvalid: "Перевір дані групи",
-      groupRenamed: "Групу перейменовано",
-      groupColorUpdated: "Колір групи оновлено",
-      groupColorMigrationRequired: "Для кольорів груп потрібна міграція Supabase v0.4.2. Виконай supabase/migrations/v0.4.2_group_colors.sql у Supabase SQL Editor та онови сторінку.",
-      groupNotFound: "Групу не знайдено",
-      groupDeleted: "Групу видалено. Посилання перенесено в «Без групи»",
-      requiredFields: "Заповни всі обовʼязкові поля",
-      reservedSlug: "Цей slug зарезервований системою. Обери інший.",
-      invalidUrl: "Кінцева адреса має починатися з http:// або https://",
-      slugExists: "Такий slug уже існує",
-      linkCreated: "Посилання створено",
-      linkDataInvalid: "Перевір дані посилання",
-      linkUpdated: "Посилання оновлено",
-      linkDeleted: "Посилання видалено",
-    },
-  },
+  }
 } as const;
 
-export function localeFor(language: Language) {
-  return language === "uk" ? "uk-UA" : "en-US";
+export function localeFor(_language: Language) {
+  return "en-US";
 }
 
-export function linksCountLabel(count: number, language: Language) {
-  if (language === "en") return `${count.toLocaleString("en-US")} ${count === 1 ? "link" : "links"}`;
-
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  const noun = mod10 === 1 && mod100 !== 11
-    ? "посилання"
-    : mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)
-      ? "посилання"
-      : "посилань";
-  return `${count.toLocaleString("uk-UA")} ${noun}`;
+export function linksCountLabel(count: number, _language: Language) {
+  return `${count.toLocaleString("en-US")} ${count === 1 ? "link" : "links"}`;
 }

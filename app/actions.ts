@@ -339,3 +339,37 @@ export async function reorderLinksAction(groupId: string | null, linkIds: string
     return { ok: false, error: error instanceof Error ? error.message : "Could not reorder links" };
   }
 }
+
+
+export async function deleteClickRecordAction(formData: FormData) {
+  await requireAdminAction();
+  const language = await getLanguage();
+  const messages = translations[language];
+  const recordId = String(formData.get("recordId") ?? "");
+  const period = String(formData.get("period") ?? "");
+  const link = String(formData.get("link") ?? "");
+
+  const params = new URLSearchParams();
+  if (["today", "week", "month", "all"].includes(period)) params.set("period", period);
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(link)) params.set("link", link);
+  const destination = `/admin${params.size ? `?${params.toString()}` : ""}#records`;
+
+  if (!/^[1-9][0-9]*$/.test(recordId)) {
+    redirect(`/admin?error=${encodeURIComponent(messages.dashboard.deleteRecordError)}#records`);
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("clicks")
+    .delete()
+    .eq("id", recordId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    params.set("error", error?.message ?? messages.dashboard.deleteRecordError);
+    redirect(`/admin?${params.toString()}#records`);
+  }
+
+  revalidatePath("/admin");
+  redirect(destination);
+}

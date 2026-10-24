@@ -25,8 +25,8 @@ function EyeIcon({ crossed }: { crossed: boolean }) {
 
 export default function PasswordField({ language = "en" }: { language?: Language }) {
   const [visible, setVisible] = useState(false);
-  const show = language === "uk" ? "Показати пароль" : "Show password";
-  const hide = language === "uk" ? "Сховати пароль" : "Hide password";
+  const show = "Show password";
+  const hide = "Hide password";
 
   return (
     <div className="password-field">

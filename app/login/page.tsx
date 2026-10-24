@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { loginAction } from "@/app/actions";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PasswordField from "@/components/PasswordField";
 import { isAdmin } from "@/lib/auth";
 import { APP_NAME, APP_VERSION } from "@/lib/app-meta";
@@ -19,9 +18,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   return (
     <main className="auth-shell">
       <section className="auth-card">
-        <div className="auth-language-switcher">
-          <LanguageSwitcher language={language} />
-        </div>
         <h1>{APP_NAME}</h1>
         <p className="muted auth-version">{APP_VERSION}</p>
 

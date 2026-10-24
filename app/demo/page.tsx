@@ -1,5 +1,5 @@
 import CopyButton from "@/components/CopyButton";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import DemoClickRecordsTable from "@/components/DemoClickRecordsTable";
 import PeriodStatsGrid, { type PeriodKey, type PeriodStats } from "@/components/PeriodStatsGrid";
 import { APP_NAME, APP_VERSION } from "@/lib/app-meta";
 import { linksCountLabel, localeFor, translations, type Language } from "@/lib/i18n";
@@ -43,7 +43,7 @@ function parsePeriod(value: string | string[] | undefined): PeriodKey | null {
 
 function dateLabel(language: Language) {
   return new Intl.DateTimeFormat(localeFor(language), {
-    timeZone: "Europe/Kyiv",
+    timeZone: "UTC",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -60,7 +60,7 @@ function periodLabel(period: PeriodKey, todayLabel: string, language: Language) 
 
 function formatDate(date: Date, language: Language) {
   return new Intl.DateTimeFormat(localeFor(language), {
-    timeZone: "Europe/Kyiv",
+    timeZone: "UTC",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -138,11 +138,14 @@ const overallStats: PeriodStats = {
 function makeDemoRecords(): DemoRecord[] {
   const now = Date.now();
   const templates = [
-    ["patreon-ig", 2, "visitor-a91c…12ef", "UA", "mobile"],
-    ["patreon-tg", 7, "visitor-6bf2…04ac", "PL", "mobile"],
-    ["youtube-ig", 16, "visitor-3cc1…e80d", "DE", "computer"],
-    ["github-tg", 29, "visitor-9f02…a713", "UA", "computer"],
-    ["patreon-ig", 55, "visitor-174e…62dd", "CZ", "tablet"],
+    ["patreon-ig", 2, "visitor-a91c…12ef", "CA", "mobile"],
+    ["patreon-tg", 7, "visitor-6bf2…04ac", "JP", "mobile"],
+    ["youtube-ig", 16, "visitor-3cc1…e80d", "BR", "computer"],
+    ["github-tg", 29, "visitor-9f02…a713", "NZ", "computer"],
+    ["patreon-ig", 55, "visitor-174e…62dd", "SE", "tablet"],
+    ["youtube-ig", 1440, "visitor-98af…14ca", "AU", "mobile"],
+    ["github-tg", 2880, "visitor-7e2f…91bc", "MX", "computer"],
+    ["patreon-tg", 4320, "visitor-102b…e2d8", "ZA", "mobile"],
   ] as const;
 
   return templates.map(([linkId, minutesAgo, visitor, countryCode, device], index) => {
@@ -171,7 +174,7 @@ export default async function DemoPage({ searchParams }: { searchParams: SearchP
   const todayLabel = dateLabel(language);
   const records = makeDemoRecords().filter((record) => !selectedLink || record.linkId === selectedLink.id);
   const groups = demoGroups;
-  const chart = [18, 24, 31, 27, 42, 36, 55, 49, 61, 44, 72, 65, 58, 80];
+  const chart = [80, 58, 65, 72, 44, 61, 49, 55, 36, 42, 27, 31, 24, 18];
   const maxDaily = Math.max(...chart);
   const deviceText = text.device;
 
@@ -184,7 +187,6 @@ export default async function DemoPage({ searchParams }: { searchParams: SearchP
           <p className="muted version-note">{APP_VERSION}</p>
         </div>
         <div className="topbar-actions">
-          <LanguageSwitcher language={language} />
           <a className="button button-ghost" href="/login">{text.demo.backToLogin}</a>
         </div>
       </header>
@@ -228,23 +230,20 @@ export default async function DemoPage({ searchParams }: { searchParams: SearchP
             </div>
             <a className="button button-ghost button-small" href="/demo">{text.common.close}</a>
           </div>
-          <div className="records-table-wrap">
-            <table className="records-table">
-              <thead><tr><th>{text.dashboard.when}</th><th>{text.dashboard.visitor}</th><th>{text.dashboard.country}</th><th>{text.dashboard.group}</th><th>{text.dashboard.sourceLink}</th><th>{text.dashboard.clickedTo}</th></tr></thead>
-              <tbody>
-                {records.map((record) => (
-                  <tr key={record.id}>
-                    <td className="nowrap">{formatDate(record.date, language)}</td>
-                    <td><code>{record.visitor}</code><span className="record-secondary">{record.device === "mobile" ? deviceText.mobile : record.device === "tablet" ? deviceText.tablet : deviceText.computer}</span></td>
-                    <td>{countryLabel(record.countryCode, language)}</td>
-                    <td>{record.group}</td>
-                    <td><strong>{record.linkName}</strong><span className="record-secondary">/{record.slug}</span></td>
-                    <td className="record-destination">{record.destination}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DemoClickRecordsTable
+            key={`${selectedPeriod}-${selectedLink?.id ?? "all"}`}
+            records={records.map((record) => ({
+              id: record.id,
+              when: formatDate(record.date, language),
+              visitor: record.visitor,
+              device: record.device === "mobile" ? deviceText.mobile : record.device === "tablet" ? deviceText.tablet : deviceText.computer,
+              country: countryLabel(record.countryCode, language),
+              group: record.group,
+              linkName: record.linkName,
+              slug: record.slug,
+              destination: record.destination,
+            }))}
+          />
         </section>
       ) : null}
 
@@ -253,7 +252,7 @@ export default async function DemoPage({ searchParams }: { searchParams: SearchP
         <div className="bars">
           {chart.map((clicks, index) => {
             const height = Math.max(8, Math.round((clicks / maxDaily) * 120));
-            return <div className="bar-item" key={`${clicks}-${index}`}><span className="bar-value">{clicks}</span><div className="bar" style={{ height }} /><span className="bar-label">{text.demo.daysAgo(13 - index)}</span></div>;
+            return <div className="bar-item" key={`${clicks}-${index}`}><span className="bar-value">{clicks}</span><div className="bar" style={{ height }} /><span className="bar-label">{index === 0 ? "Today" : index === 1 ? "Yesterday" : new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(Date.now() - index * 86400000))}</span></div>;
           })}
         </div>
       </section>
