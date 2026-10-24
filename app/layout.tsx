@@ -6,6 +6,8 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
+  applicationName: APP_NAME,
+  appleWebApp: { capable: true, title: APP_NAME, statusBarStyle: "default" },
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

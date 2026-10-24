@@ -1546,3 +1546,51 @@ select option {
 .auth-card {
   padding-top: 30px;
 }
+
+/* v0.7.0 - notification settings / PWA */
+.push-settings { scroll-margin-top: 24px; }
+.push-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.push-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 13px;
+  border: 1px solid var(--line-strong);
+  padding: 14px;
+  background: var(--panel-soft);
+}
+.push-summary strong { font-size: 19px; }
+.push-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.push-hint { margin-top: 12px; font-size: 12px; line-height: 1.6; }
+.push-note {
+  border: 1px solid #ecc88a;
+  border-radius: 14px;
+  background: #fff9e9;
+  padding: 13px 16px;
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #7a4b17;
+}
+.push-preferences { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 20px; }
+.push-preferences h3 { margin-bottom: 8px; }
+.push-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.push-option > span { display: grid; gap: 4px; }
+.push-option strong { font-size: 14px; }
+.push-option small { font-weight: 400; color: var(--muted); line-height: 1.5; }
+.push-option input[type="checkbox"] { width: 20px; height: 20px; min-height: 20px; accent-color: #0b1730; flex-shrink: 0; }
+.push-preferences > .button { margin-top: 16px; }
+@media (max-width: 620px) { .push-summary { grid-template-columns: 1fr; } }

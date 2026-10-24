@@ -4,6 +4,23 @@ Release history is maintained in English.
 
 ---
 
+## v0.7.0 — Android PWA and Web Push notifications
+
+- Added installable PWA manifest and Android-friendly app icons.
+- Added Service Worker for real browser/Android push notifications (no APK required).
+- Added authenticated device subscription API and protected notification settings in the admin dashboard.
+- Implemented opt-in click notifications and new unique visitor alerts.
+- Added link milestones (100, 500, 1,000 and every further 1,000 clicks).
+- Added opt-in daily click/unique visitor summary via secure Vercel Cron.
+- Added server-side Web Push encryption and VAPID signing with Node.js crypto (no extra npm dependency).
+- Added safe v0.7.0 Supabase migration and updated the complete schema.
+- Continued English-only UI and documentation policy.
+
+**Commit:** `feat: add PWA push notifications and daily summaries`  
+**Release tag:** `v0.7.0`
+
+---
+
 ## v0.6.0 — English-only UI and click record controls
 
 - Removed Ukrainian UI translations and language switcher; TrackLink now displays English only.

@@ -1,6 +1,6 @@
 # TrackLink
 
-Version: **v0.6.0**
+Version: **v0.7.0**
 
 > **v0.6.0:** English-only interface, international demo records, per-record click deletion with confirmation, and newest-first 14-day charts. No additional database migration is required.
 
@@ -19,6 +19,8 @@ Short tracking URLs look like this:
 All links can redirect to the same destination while keeping separate statistics for each slug.
 
 ## Features
+
+- Installable Android PWA with admin-only Web Push, notification preferences, test push and a protected daily-summary Cron job.
 
 - unlimited tracking links;
 - English-only interface for login, admin, and demo;
@@ -241,3 +243,81 @@ If the warning contains foreign attributes such as `bis_skin_checked`, `bis_regi
 - The 14-day chart starts with **Today**, then **Yesterday**, followed by older dates; days without clicks show zero.
 
 There is no SQL migration for this version. Previous migrations (including v0.5.0 link ordering) still apply to older installations.
+
+## v0.7.0 — Android PWA and Web Push notifications
+
+TrackLink can be installed as a PWA on Android from Chrome, and can send system notifications even when the site is closed. A mobile-native APK is not needed. HTTPS is required in production; `http://localhost` is permitted for development.
+
+**Push is opt-in and admin-only.** Only a logged-in TrackLink administrator can enable push on a device. Visitors who open your short tracking links do not see any push permission prompt. The public demo does not connect to push or the database.
+
+### 1. Apply the Supabase migration
+
+In your Supabase project's **SQL Editor**, run:
+
+```text
+supabase/migrations/v0.7.0_push_notifications.sql
+```
+
+It creates `push_subscriptions`, `push_preferences`, `push_daily_dispatches`, and the `tracklink_push_daily_stats()` database function. It does **not** delete, rewrite, or reset existing links/clicks. Existing tracking URLs continue to work. For fresh installs, the complete `supabase/schema.sql` includes this migration.
+
+### 2. Generate VAPID keys
+
+In a terminal inside the TrackLink project folder, run:
+
+```bash
+npm run vapid:generate
+```
+
+This prints `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`. **Generate them once per TrackLink installation** and keep them stable — rotating them invalidates existing browser push subscriptions. Never commit private keys, `.env.local`, or a cron secret to GitHub.
+
+Add these new environment variables to `.env.local` **and** Vercel Project → Settings → Environment Variables:
+
+```env
+VAPID_PUBLIC_KEY=<generated-public-key>
+VAPID_PRIVATE_KEY=<generated-private-key>
+VAPID_SUBJECT=mailto:you@your-real-domain.example
+CRON_SECRET=<separate-random-secret-of-16-or-more-characters>
+```
+
+Replace the placeholder subject with a **real** contact email address (or a valid `https://` contact URL). Some push services reject invalid VAPID subjects. Keep existing variables `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `ADMIN_PASSWORD` and `ADMIN_SECRET` unchanged.
+
+Restart the local Next.js server after editing `.env.local`. Redeploy Vercel after adding environment variables there.
+
+### 3. Install and enable notifications on Android
+
+1. Open the **production HTTPS** TrackLink address in **Chrome on Android**, for example `https://your-domain.com/admin`.
+2. Log in to your TrackLink admin account.
+3. Chrome menu → **Add to Home screen** / **Install app** (wording depends on Android and Chrome versions).
+4. Open the installed TrackLink app, find **Notifications / PWA**, tap **Enable notifications**, and allow notifications when Android/Chrome asks.
+5. Tap **Send test push** to check delivery.
+6. Choose preferences and tap **Save settings**.
+
+The PWA has a TrackLink icon, `standalone` display mode, and a service worker that handles push events. It does not cache tracking redirects or analytics pages for offline use.
+
+### Push preferences
+
+- **Every click:** off by default (can generate a lot of notifications).
+- **New unique visitor:** on by default, using TrackLink's anonymous browser cookie ID.
+- **Click milestones:** on by default (100, 500, 1,000, 2,000, 3,000… clicks per link).
+- **Daily summary:** off by default. Summarizes *yesterday's* clicks and unique visitors using `Europe/Kyiv` calendar dates.
+
+Options apply to **all registered devices** (up to 10). Notification events are sent on a best-effort basis after a successful click insert; analytics/redirects never depend on successful push delivery. Because the browser push provider and Android control final delivery, arrival is not guaranteed or precisely timed. New-visitor and milestone detection may be approximate under high concurrent traffic. There is no push notification for simulated demo clicks.
+
+### Daily summaries — Vercel Cron
+
+`vercel.json` schedules `/api/cron/daily-summary` at **07:00 UTC once per day** (roughly 09:00 or 10:00 Kyiv time depending on daylight saving). This is compatible with Vercel Hobby's daily cron frequency restriction; on Hobby the job may start at any time within the scheduled hour. The endpoint requires `Authorization: Bearer <CRON_SECRET>`. Without `CRON_SECRET`, requests return HTTP 401. Set it in Vercel project environment variables before deploying.
+
+A `push_daily_dispatches` table prevents routine duplicate sends for the same calendar day. The notification is sent only if `Daily summary` is enabled. For an empty day, the message reports zero clicks.
+
+### Troubleshooting
+
+- **Push settings show a database error:** apply the `v0.7.0` SQL migration, then refresh the page. Check your Supabase project and API key.
+- **Push not configured:** set all three `VAPID_...` values, restart/redeploy, then refresh.
+- **Permission denied:** allow notifications in Android system settings and browser site settings, then retry.
+- **No push on a device:** use `Send test push`, check internet/notifications/battery restrictions, and resubscribe when the subscription expires.
+- **No daily summary:** enable the preference, ensure `CRON_SECRET` is set, and review the Vercel Cron logs.
+- **No Install app button:** use the Android Chrome menu; browser support and installation choices vary.
+
+### Security and privacy
+
+Push subscriptions (device-specific endpoints and public encryption material) are stored in **Supabase with RLS enabled and no public policies**. Push API endpoints require the authenticated admin cookie, and mutations check their request origin. The private VAPID signing key stays on the server. `push_subscriptions` are deleted automatically when a push service reports expiration (HTTP 404/410). TrackLink does not add IP storage or expose visitor names.

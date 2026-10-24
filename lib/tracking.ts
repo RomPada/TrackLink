@@ -1,6 +1,7 @@
 import { after, NextRequest, NextResponse } from "next/server";
 import { isLikelyBot, isPrefetch } from "@/lib/bots";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { notifyRecordedClick } from "@/lib/notifications";
 
 function normalizeCountryCode(value: string | null) {
   if (!value) return null;
@@ -65,7 +66,15 @@ export async function handleTrackingGet(request: NextRequest, slug: string) {
     after(async () => {
       const supabase = getSupabaseAdmin();
       const { error } = await supabase.from("clicks").insert(click);
-      if (error) console.error("Failed to save click", error);
+      if (error) {
+        console.error("Failed to save click", error);
+        return;
+      }
+      try {
+        await notifyRecordedClick({ linkId: link.id, visitorId: click.visitor_id, countryCode });
+      } catch (notificationError) {
+        console.error("TrackLink push notification failed", notificationError);
+      }
     });
   }
 

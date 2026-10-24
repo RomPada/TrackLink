@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
 import CopyButton from "@/components/CopyButton";
+import PushSettings from "@/components/PushSettings";
 import GroupColorPicker from "@/components/GroupColorPicker";
 import GroupSelect from "@/components/GroupSelect";
 import SortableLinks from "@/components/SortableLinks";
@@ -447,6 +448,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Search
           </article>
         </div>
       </section>
+
+      <PushSettings />
 
       <section className="stats-section">
         <PeriodStatsGrid stats={overallStats} todayLabel={todayLabel} language={language} selectedPeriod={selectedPeriod} selectedLinkId={selectedLink?.id ?? null} />
